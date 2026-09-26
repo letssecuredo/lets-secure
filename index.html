@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Let-S Secure — Private Certificate Authority</title>
+<meta name="description" content="Generate, verify and manage private SSL/TLS certificates with Let-S Secure Private CA." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z' fill='none' stroke='%2338bdf8' stroke-width='1.7'/></svg>" />
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+*{margin:0;padding:0}
+:root{
+  --primary:#1f6feb;
+  --secondary:#7c3aed;
+  --bg:#0b1020;
+  --card:#111827;
+  --text:#ffffff;
+  --accent:#38bdf8;
+  --muted:#94a3b8;
+  --line:rgba(255,255,255,.09);
+  --glass:rgba(17,24,39,.62);
+  --ok:#22c55e;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --max:1180px;
+  --r:20px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img,svg{display:block;max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(56,189,248,.35)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#0b1020}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#1f6feb,#7c3aed);border-radius:10px;border:2px solid #0b1020}
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg .grid-lines{
+  position:absolute;inset:-4px;
+  background-image:
+    linear-gradient(rgba(148,163,184,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.055) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse 85% 65% at 50% 0%,#000 15%,transparent 78%);
+  mask-image:radial-gradient(ellipse 85% 65% at 50% 0%,#000 15%,transparent 78%);
+}
+.orb{position:absolute;border-radius:50%;filter:blur(110px);opacity:.45;will-change:transform}
+.orb-1{width:560px;height:560px;background:var(--primary);top:-220px;left:-160px;animation:drift1 20s ease-in-out infinite}
+.orb-2{width:480px;height:480px;background:var(--secondary);top:8%;right:-200px;animation:drift2 26s ease-in-out infinite}
+.orb-3{width:420px;height:420px;background:var(--accent);bottom:-200px;left:35%;opacity:.22;animation:drift3 30s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,60px) scale(1.12)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,90px) scale(1.08)}}
+@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-70px)}}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container{width:100%;max-width:var(--max);margin-inline:auto;padding-inline:20px}
+main{flex:1}
+.page{display:none}
+.page.active{display:block;animation:pageIn .55s var(--ease) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.section{padding:76px 0}
+.section-head{max-width:660px;margin:0 auto 44px;text-align:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);background:rgba(56,189,248,.09);
+  border:1px solid rgba(56,189,248,.25);
+  padding:6px 14px;border-radius:999px;margin-bottom:16px;
+}
+h1,h2,h3{line-height:1.18;letter-spacing:-.02em;font-weight:800}
+h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
+.section-head p{color:var(--muted);font-size:1rem}
+.grad{background:linear-gradient(110deg,var(--accent),var(--primary) 45%,var(--secondary));-webkit-background-clip:text;background-clip:text;color:transparent}
+.glass{
+  background:linear-gradient(158deg,rgba(17,24,39,.88),rgba(17,24,39,.5));
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--line);border-radius:var(--r);position:relative;overflow:hidden;
+}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(140deg,rgba(255,255,255,.07),transparent 42%);opacity:.85}
+
+/* Icons */
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}
+.ic-lg{width:26px;height:26px}
+.ic-xl{width:40px;height:40px;stroke-width:1.5}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.site-header{
+  position:sticky;top:0;z-index:120;background:rgba(11,16,32,.72);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--line);
+}
+.nav{max-width:var(--max);margin-inline:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
+.brand-mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;box-shadow:0 0 22px rgba(31,111,235,.6),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.brand:hover .brand-mark{transform:rotate(-8deg) scale(1.06);box-shadow:0 0 34px rgba(124,58,237,.75)}
+.brand-text{white-space:nowrap}
+.brand-text b{color:var(--accent);font-weight:800}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{position:relative;padding:9px 15px;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--muted);transition:color .25s,background .25s;white-space:nowrap;cursor:pointer}
+.nav-link::after{content:"";position:absolute;left:15px;right:15px;bottom:4px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--secondary));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.05)}
+.nav-link:hover::after{transform:scaleX(1)}
+.nav-link.active{color:#fff;background:rgba(31,111,235,.14)}
+.nav-link.active::after{transform:scaleX(1)}
+.nav-cta{margin-left:8px}
+.menu-btn{display:none;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:#fff;place-items:center;cursor:pointer;transition:.25s}
+.menu-btn:hover{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.4)}
+@media (max-width:900px){
+  .nav-links{position:absolute;top:calc(100% + 8px);left:16px;right:16px;flex-direction:column;align-items:stretch;gap:4px;padding:12px;border-radius:18px;background:rgba(11,16,32,.97);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);box-shadow:0 26px 60px -20px rgba(0,0,0,.9);opacity:0;transform:translateY(-12px);pointer-events:none;transition:opacity .28s var(--ease),transform .28s var(--ease)}
+  .nav-links.open{opacity:1;transform:none;pointer-events:auto}
+  .nav-link{padding:12px 14px;font-size:.95rem}
+  .nav-link::after{display:none}
+  .nav-cta{margin:6px 0 0;justify-content:center}
+  .menu-btn{display:grid}
+}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:13px;border:1px solid transparent;font-size:.94rem;font-weight:600;cursor:pointer;white-space:nowrap;position:relative;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s,border-color .3s,color .3s;text-align:center}
+.btn:active{transform:translateY(0) scale(.985)}
+.btn-sm{padding:10px 17px;font-size:.87rem;border-radius:11px}
+.btn-primary{background:linear-gradient(120deg,var(--primary),var(--secondary));color:#fff;box-shadow:0 10px 30px -10px rgba(31,111,235,.95),0 0 0 1px rgba(255,255,255,.06) inset}
+.btn-primary::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.4),transparent 80%);transform:translateX(-130%);transition:transform .7s var(--ease)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 18px 42px -12px rgba(124,58,237,1),0 0 26px rgba(56,189,248,.45)}
+.btn-primary:hover::before{transform:translateX(130%)}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:#e6edf7}
+.btn-ghost:hover{transform:translateY(-3px);border-color:rgba(56,189,248,.55);background:rgba(56,189,248,.1);box-shadow:0 14px 34px -16px rgba(56,189,248,.9)}
+.btn-danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.42);color:#fca5a5}
+.btn-danger:hover{background:rgba(239,68,68,.22);transform:translateY(-3px);box-shadow:0 14px 34px -16px rgba(239,68,68,.9)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+
+/* Hero */
+.hero{padding:74px 0 56px;display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:9px;font-size:.76rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#cbd5e1;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:7px 15px;border-radius:999px;margin-bottom:22px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(34,197,94,.7);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.65)}70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.hero h1{font-size:clamp(2.05rem,5.1vw,3.5rem);margin-bottom:18px}
+.hero .lead{font-size:clamp(1rem,1.6vw,1.13rem);color:#a9b6cd;max-width:560px;margin-bottom:32px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:34px}
+.trust{display:flex;flex-wrap:wrap;gap:26px;padding-top:26px;border-top:1px solid var(--line)}
+.trust-item strong{display:block;font-size:1.28rem;font-weight:800;letter-spacing:-.02em}
+.trust-item span{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.11em;font-weight:600}
+.hero-visual{position:relative;display:grid;place-items:center}
+.hero-visual::before{content:"";position:absolute;width:78%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(31,111,235,.35),transparent 68%);filter:blur(38px);animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.75}50%{transform:scale(1.14);opacity:1}}
+.cert-mock{width:100%;max-width:400px;padding:22px;z-index:2;animation:floaty 7s ease-in-out infinite;box-shadow:0 40px 80px -34px rgba(0,0,0,.95),0 0 60px -34px rgba(56,189,248,.75)}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.cert-mock::before{content:"";position:absolute;left:0;right:0;height:78px;top:-78px;background:linear-gradient(180deg,transparent,rgba(56,189,248,.16),transparent);animation:scan 5s linear infinite}
+@keyframes scan{0%{top:-78px}100%{top:100%}}
+.cert-mock-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px dashed rgba(255,255,255,.13)}
+.cert-mock-head .logo-sq{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,rgba(31,111,235,.3),rgba(124,58,237,.3));border:1px solid rgba(56,189,248,.32);color:var(--accent)}
+.cert-mock-head strong{display:block;font-size:.92rem}
+.cert-mock-head small{color:var(--muted);font-size:.73rem;letter-spacing:.06em;text-transform:uppercase}
+.chip{margin-left:auto;font-size:.66rem;font-weight:800;letter-spacing:.1em;padding:5px 11px;border-radius:999px;text-transform:uppercase}
+.chip-ok{color:#6ee7a8;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35)}
+.chip-bad{color:#fca5a5;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35)}
+.chip-warn{color:#fcd34d;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35)}
+.cert-mock-body{padding:16px 0;display:grid;gap:11px}
+.kv{display:flex;justify-content:space-between;gap:14px;font-size:.83rem;align-items:center}
+.kv span{color:var(--muted)}
+.kv b{font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.79rem;text-align:right;word-break:break-all}
+.cert-mock-foot{padding-top:14px;border-top:1px dashed rgba(255,255,255,.13);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.68rem;color:#64748b;letter-spacing:.04em;word-break:break-all}
+
+/* Form */
+.request-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start}
+.form-card{padding:28px}
+.form-card h3{font-size:1.15rem;margin-bottom:6px}
+.form-card .sub{color:var(--muted);font-size:.86rem;margin-bottom:22px}
+.field{margin-bottom:17px}
+.field label{display:block;font-size:.76rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#a8b6cd;margin-bottom:8px}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-wrap .ic{position:absolute;left:14px;color:#54657f;pointer-events:none;transition:color .25s}
+.field input,.field select{width:100%;padding:13px 15px 13px 44px;border-radius:13px;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.93rem;transition:border-color .25s,box-shadow .25s,background .25s}
+.field input::placeholder{color:#4a5a73}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);background:rgba(8,12,24,.95);box-shadow:0 0 0 4px rgba(56,189,248,.14),0 0 22px -8px rgba(56,189,248,.85)}
+.input-wrap:focus-within .ic{color:var(--accent)}
+.field.invalid input{border-color:var(--danger);box-shadow:0 0 0 4px rgba(239,68,68,.13)}
+.err{display:none;color:#fca5a5;font-size:.76rem;margin-top:6px}
+.field.invalid .err{display:block;animation:pageIn .3s ease both}
+.form-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+
+/* Result */
+.result-card{padding:28px;min-height:100%}
+.result-empty{display:grid;place-items:center;text-align:center;gap:12px;padding:44px 12px;color:var(--muted)}
+.result-empty .ring{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:rgba(56,189,248,.07);border:1px dashed rgba(56,189,248,.35);color:var(--accent)}
+.result-empty p{font-size:.88rem;max-width:270px}
+.issued-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.issued-head .ok-ring{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;flex:none;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.4);color:#4ade80;box-shadow:0 0 26px -6px rgba(34,197,94,.75);animation:pop .55s var(--ease) both}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.issued-head h3{font-size:1.08rem}
+.issued-head p{font-size:.8rem;color:var(--muted)}
+.data-list{display:grid;gap:1px;background:rgba(255,255,255,.06);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.data-row{display:flex;justify-content:space-between;gap:14px;align-items:center;background:rgba(11,16,32,.72);padding:12px 15px;font-size:.83rem}
+.data-row .k{color:var(--muted);flex:none}
+.data-row .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;text-align:right;word-break:break-all}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.issuing{display:grid;gap:14px;padding:16px 4px}
+.issuing h3{font-size:1rem;margin-bottom:6px}
+.step{display:flex;align-items:center;gap:12px;font-size:.87rem;color:var(--muted);opacity:.4;transition:.4s}
+.step.active{opacity:1;color:#fff}
+.step.done{opacity:1;color:#8ee7b0}
+.step .dot{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;border:1px solid rgba(255,255,255,.15);font-size:.7rem;background:rgba(255,255,255,.04);transition:.4s}
+.step.active .dot{border-color:var(--accent);color:var(--accent);box-shadow:0 0 18px -4px rgba(56,189,248,.95)}
+.step.done .dot{border-color:rgba(34,197,94,.6);background:rgba(34,197,94,.15);color:#4ade80}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(56,189,248,.28);border-top-color:var(--accent);animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Features */
+.features-grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(232px,1fr))}
+.feature{padding:26px 22px;transition:transform .45s var(--ease),border-color .45s,box-shadow .45s}
+.feature:hover{transform:translateY(-8px);border-color:rgba(56,189,248,.42);box-shadow:0 30px 60px -30px rgba(31,111,235,.95),0 0 34px -18px rgba(56,189,248,.9)}
+.feature .f-icon{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;margin-bottom:17px;color:var(--accent);background:linear-gradient(140deg,rgba(31,111,235,.22),rgba(124,58,237,.22));border:1px solid rgba(56,189,248,.25);transition:transform .45s var(--ease),box-shadow .45s}
+.feature:hover .f-icon{transform:rotate(-7deg) scale(1.08);box-shadow:0 0 30px -6px rgba(56,189,248,.85)}
+.feature h3{font-size:1.02rem;margin-bottom:8px}
+.feature p{font-size:.86rem;color:var(--muted);line-height:1.62}
+.feature::before{content:"";position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.65),transparent);opacity:0;transition:opacity .45s}
+.feature:hover::before{opacity:1}
+
+/* Page head + tools */
+.page-head{padding:60px 0 8px;text-align:center}
+.page-head h1{font-size:clamp(1.75rem,4.2vw,2.6rem);margin-bottom:12px}
+.page-head p{color:var(--muted);max-width:590px;margin-inline:auto;font-size:.98rem}
+.tool-card{padding:26px;max-width:820px;margin:34px auto 0}
+.search-row{display:flex;gap:12px;flex-wrap:wrap}
+.search-row .input-wrap{flex:1;min-width:220px}
+.search-row .input-wrap input{width:100%;padding:14px 15px 14px 46px;border-radius:13px;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.94rem;transition:border-color .25s,box-shadow .25s}
+.search-row .input-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(56,189,248,.14),0 0 22px -8px rgba(56,189,248,.9)}
+.verify-result{margin-top:24px;animation:pageIn .5s var(--ease) both}
+.verify-banner{display:flex;align-items:center;gap:16px;padding:18px;border-radius:16px;margin-bottom:18px;border:1px solid transparent}
+.verify-banner.ok{background:rgba(34,197,94,.09);border-color:rgba(34,197,94,.34)}
+.verify-banner.bad{background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.34)}
+.verify-banner.warn{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.34)}
+.verify-banner .vb-icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;flex:none}
+.verify-banner.ok .vb-icon{background:rgba(34,197,94,.16);color:#4ade80;box-shadow:0 0 30px -8px rgba(34,197,94,.95)}
+.verify-banner.bad .vb-icon{background:rgba(239,68,68,.16);color:#fca5a5;box-shadow:0 0 30px -8px rgba(239,68,68,.95)}
+.verify-banner.warn .vb-icon{background:rgba(245,158,11,.16);color:#fcd34d}
+.verify-banner h3{font-size:1.05rem}
+.verify-banner p{font-size:.83rem;color:var(--muted)}
+.timeline{display:grid;gap:0;margin:20px 0 4px}
+.tl-item{display:flex;gap:14px;position:relative;padding-bottom:22px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:11px;top:26px;bottom:0;width:2px;background:linear-gradient(180deg,rgba(56,189,248,.5),rgba(56,189,248,.06))}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;border:2px solid rgba(56,189,248,.5);background:#0b1020;color:var(--accent)}
+.tl-item.revoked .tl-dot{border-color:rgba(239,68,68,.65);color:#fca5a5}
+.tl-item strong{display:block;font-size:.9rem}
+.tl-item span{font-size:.78rem;color:var(--muted)}
+.cert-list{display:grid;gap:14px;margin-top:26px}
+.cert-item{display:flex;align-items:center;gap:16px;padding:16px 18px;flex-wrap:wrap;transition:transform .35s var(--ease),border-color .35s,box-shadow .35s}
+.cert-item:hover{transform:translateY(-4px);border-color:rgba(56,189,248,.4);box-shadow:0 22px 46px -26px rgba(56,189,248,.9)}
+.cert-item .ci-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;background:rgba(31,111,235,.16);border:1px solid rgba(56,189,248,.24);color:var(--accent)}
+.cert-item .ci-main{flex:1;min-width:180px}
+.cert-item .ci-main strong{display:block;font-size:.92rem;word-break:break-all}
+.cert-item .ci-main small{color:var(--muted);font-size:.76rem}
+.empty-state{text-align:center;padding:46px 20px;color:var(--muted);font-size:.9rem;border:1px dashed rgba(255,255,255,.14);border-radius:16px}
+.pem-box{margin-top:20px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:rgba(4,8,18,.85)}
+.pem-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);font-size:.76rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+.pem-body{padding:16px;max-height:280px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.72rem;line-height:1.65;color:#8fb7e0;white-space:pre-wrap;word-break:break-all}
+
+/* Admin */
+.admin-card{padding:26px;max-width:520px;margin:34px auto 0}
+.admin-card h3{font-size:1.1rem;margin-bottom:6px}
+.admin-card .sub{color:var(--muted);font-size:.86rem;margin-bottom:20px}
+.admin-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.admin-header h2{font-size:1.4rem;margin:0}
+.admin-badge{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4ade80;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);padding:5px 12px;border-radius:999px}
+.log-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.log-table th{text-align:left;padding:10px 12px;color:var(--muted);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line);font-weight:700}
+.log-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
+.log-table tr:hover td{background:rgba(56,189,248,.04)}
+.log-action{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.72rem;color:var(--accent)}
+.log-success{color:#4ade80}
+.log-fail{color:#fca5a5}
+
+/* Footer */
+.site-footer{margin-top:auto;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(11,16,32,.4),rgba(6,10,22,.92));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.footer-inner{max-width:var(--max);margin-inline:auto;padding:44px 20px 26px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:34px}
+.footer-brand{display:flex;align-items:center;gap:11px;font-weight:800;margin-bottom:14px}
+.footer-inner p{font-size:.84rem;color:var(--muted);max-width:330px}
+.footer-col h4{font-size:.74rem;letter-spacing:.13em;text-transform:uppercase;color:#93a4c0;margin-bottom:14px;font-weight:800}
+.footer-col a{display:block;font-size:.86rem;color:var(--muted);padding:5px 0;transition:color .25s,transform .25s;cursor:pointer}
+.footer-col a:hover{color:var(--accent);transform:translateX(4px)}
+.footer-bottom{border-top:1px solid var(--line);padding:18px 20px;max-width:var(--max);margin-inline:auto;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.78rem;color:#64748b}
+.footer-bottom b{color:var(--accent);font-weight:600}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:200;display:grid;gap:10px;justify-items:end}
+.toast{display:flex;align-items:center;gap:11px;padding:13px 17px;border-radius:14px;font-size:.86rem;font-weight:500;background:rgba(17,24,39,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:0 24px 50px -22px rgba(0,0,0,.95);animation:toastIn .4s var(--ease) both;max-width:min(360px,90vw)}
+.toast.out{animation:toastOut .35s var(--ease) forwards}
+.toast.ok{border-color:rgba(34,197,94,.45)}
+.toast.ok .ic{color:#4ade80}
+.toast.err{border-color:rgba(239,68,68,.45)}
+.toast.err .ic{color:#fca5a5}
+.toast.info{border-color:rgba(56,189,248,.45)}
+.toast.info .ic{color:var(--accent)}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px) scale(.95)}}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .75s var(--ease),transform .75s var(--ease)}
+.reveal.visible{opacity:1;transform:none}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;gap:46px;padding-top:54px;text-align:center}
+  .hero .lead{margin-inline:auto}
+  .hero-actions{justify-content:center}
+  .trust{justify-content:center}
+  .request-grid{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:28px}
+  .footer-brand{grid-column:1/-1}
+}
+@media (max-width:640px){
+  .section{padding:58px 0}
+  .hero{padding-top:42px}
+  .form-card,.result-card,.tool-card,.admin-card{padding:22px 18px}
+  .btn{width:100%}
+  .hero-actions .btn,.form-actions .btn{width:100%}
+  .search-row .btn{width:100%}
+  .trust{gap:20px}
+  .trust-item strong{font-size:1.1rem}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-bottom{justify-content:center;text-align:center}
+  .toast-wrap{left:16px;right:16px;justify-items:stretch}
+  .toast{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== ICONS ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z"/><path d="m9 11.8 2.1 2.1L15.2 9.8"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/><circle cx="12" cy="15.5" r="1.2"/></symbol>
+    <symbol id="i-cert" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M14 3v5h5"/><circle cx="12" cy="14" r="2.4"/><path d="M10.4 15.9 9.6 20l2.4-1.4 2.4 1.4-.8-4.1"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4.2"/><path d="m11 11 8.5 8.5"/><path d="m16.5 16.5 2-2"/><path d="m14 14 2-2"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.3 12.3 2.5 2.5 4.9-5.2"/></symbol>
+    <symbol id="i-x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9.3 9.3 5.4 5.4M14.7 9.3l-5.4 5.4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5v11"/><path d="m7.8 10.6 4.2 4.2 4.2-4.2"/><path d="M4.5 17.5v1.2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-1.2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20.2 4.2v4.4h-4.4"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.7"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.2A2 2 0 0 1 5.5 5.2h3.4l2 2.4h7.6a2 2 0 0 1 2 2v8.2a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.2 12h17.6"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.2" y="5.5" width="17.6" height="13" rx="2.4"/><path d="m4 7.5 8 5.4 8-5.4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.2v13.6M5.2 12h13.6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.2"/><path d="M15 6.4V5.6A2.2 2.2 0 0 0 12.8 3.4H5.6A2.2 2.2 0 0 0 3.4 5.6v7.2A2.2 2.2 0 0 0 5.6 15h.8"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.2 2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2"/><path d="M12 7.9h.01"/></symbol>
+    <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></symbol>
+  </defs>
+</svg>
+
+<!-- ===================== BACKGROUND ===================== -->
+<div class="bg" aria-hidden="true">
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <nav class="nav" aria-label="Main navigation">
+    <a class="brand" href="#/home" data-page="home">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+      <svg class="ic"><use href="#i-menu"/></svg>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a class="nav-link active" href="#/home" data-page="home">Home</a>
+      <a class="nav-link" href="#/verify" data-page="verify">Verify</a>
+      <a class="nav-link" href="#/status" data-page="status">Status</a>
+      <a class="nav-link" href="#/download" data-page="download">Download</a>
+      <a class="nav-link" href="#/admin" data-page="admin" id="admin-nav-link">Admin</a>
+      <button class="btn btn-primary btn-sm nav-cta" data-goto="home" data-anchor="#request">
+        <svg class="ic ic-sm"><use href="#i-plus"/></svg> Generate
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============================================================
+       PAGE: HOME
+       ============================================================ -->
+  <section id="page-home" class="page active">
+    <div class="container">
+      <div class="hero">
+        <div class="hero-copy reveal">
+          <div class="badge"><span class="pulse-dot"></span> Private CA · X.509 v3 · SHA-256</div>
+          <h1>Secure Your Projects With <span class="grad">Private Certificates</span></h1>
+          <p class="lead">Generate, Verify and Manage Certificates using Let-S Secure Private CA</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-goto="home" data-anchor="#request">
+              <svg class="ic ic-sm"><use href="#i-plus"/></svg> Generate Certificate
+            </button>
+            <button class="btn btn-ghost" data-goto="verify">
+              <svg class="ic ic-sm"><use href="#i-search"/></svg> Verify Certificate
+            </button>
+          </div>
+          <div class="trust">
+            <div class="trust-item"><strong>2048-bit</strong><span>RSA Keys</span></div>
+            <div class="trust-item"><strong>SHA-256</strong><span>Signatures</span></div>
+            <div class="trust-item"><strong>365 days</strong><span>Validity</span></div>
+            <div class="trust-item"><strong>OCSP</strong><span>Revocation</span></div>
+          </div>
+        </div>
+        <div class="hero-visual reveal">
+          <div class="cert-mock glass">
+            <div class="cert-mock-head">
+              <div class="logo-sq"><svg class="ic ic-lg"><use href="#i-shield"/></svg></div>
+              <div><strong>Let-S Secure</strong><small>Private Root CA</small></div>
+              <span class="chip chip-ok">Valid</span>
+            </div>
+            <div class="cert-mock-body">
+              <div class="kv"><span>Subject</span><b>*.letssecure.dev</b></div>
+              <div class="kv"><span>Issuer</span><b>CN=Let-S Secure CA</b></div>
+              <div class="kv"><span>Serial</span><b>7F:2A:C1:90:4E:B8:33:D1</b></div>
+              <div class="kv"><span>Algorithm</span><b>sha256WithRSA</b></div>
+            </div>
+            <div class="cert-mock-foot">SHA-256 · 4C:1B:9E:7A:22:D0:88:F3:51:AB:6C:02:9D:E4:71:B8…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Request form -->
+    <div class="container">
+      <section class="section" id="request">
+        <div class="section-head reveal">
+          <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-cert"/></svg> Certificate Request</span>
+          <h2>Generate a Private Certificate</h2>
+          <p>Submit your project details and our private CA will issue a signed X.509 certificate instantly.</p>
+        </div>
+        <div class="request-grid">
+          <form class="glass form-card reveal" id="cert-form" novalidate>
+            <h3>Certificate Signing Request</h3>
+            <p class="sub">All fields are required. Data is signed by the Render-backed CA.</p>
+            <div class="field" data-field="owner">
+              <label for="f-owner">Owner Name</label>
+              <div class="input-wrap"><svg class="ic"><use href="#i-user"/></svg><input id="f-owner" name="owner" type="text" placeholder="e.g. Aditya Sharma" autocomplete="name" /></div>
+              <span class="err">Please enter the certificate owner's name.</span>
+            </div>
+            <div class="field" data-field="project">
+              <label for="f-project">Project Name</label>
+              <div class="input-wrap"><svg class="ic"><use href="#i-folder"/></svg><input id="f-project" name="project" type="text" placeholder="e.g. Nebula API Gateway" /></div>
+              <span class="err">Please enter a project name.</span>
+            </div>
+            <div class="field" data-field="domain">
+              <label for="f-domain">Domain Name</label>
+              <div class="input-wrap"><svg class="ic"><use href="#i-globe"/></svg><input id="f-domain" name="domain" type="text" placeholder="e.g. api.nebula.dev" /></div>
+              <span class="err">Enter a valid domain, e.g. api.example.com</span>
+            </div>
+            <div class="field" data-field="email">
+              <label for="f-email">Email</label>
+              <div class="input-wrap"><svg class="ic"><use href="#i-mail"/></svg><input id="f-email" name="email" type="email" placeholder="e.g. security@nebula.dev" autocomplete="email" /></div>
+              <span class="err">Enter a valid email address.</span>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="issue-btn">
+                <svg class="ic ic-sm"><use href="#i-key"/></svg> Generate Certificate
+              </button>
+              <button type="reset" class="btn btn-ghost">
+                <svg class="ic ic-sm"><use href="#i-refresh"/></svg> Reset
+              </button>
+            </div>
+          </form>
+          <aside class="glass result-card reveal" id="issue-result" aria-live="polite">
+            <div class="result-empty">
+              <div class="ring"><svg class="ic ic-xl"><use href="#i-shield"/></svg></div>
+              <h3>Awaiting Request</h3>
+              <p>Your issued certificate, serial number and SHA-256 fingerprint will appear here.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </div>
+
+    <!-- Features -->
+    <div class="container">
+      <section class="section" id="features">
+        <div class="section-head reveal">
+          <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-lock"/></svg> Platform Capabilities</span>
+          <h2>Everything a Private CA Should Do</h2>
+          <p>A complete certificate lifecycle — from key generation to revocation — built for modern development teams.</p>
+        </div>
+        <div class="features-grid grid-stagger">
+          <article class="glass feature reveal">
+            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-cert"/></svg></div>
+            <h3>Certificate Generation</h3>
+            <p>Issue X.509 v3 certificates signed by the Let-S Secure private root in milliseconds.</p>
+          </article>
+          <article class="glass feature reveal">
+            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-key"/></svg></div>
+            <h3>Digital Signature</h3>
+            <p>SHA-256 with RSA-2048 signing guarantees integrity and authentic origin for every cert.</p>
+          </article>
+          <article class="glass feature reveal">
+            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>
+            <h3>Certificate Verification</h3>
+            <p>Validate any certificate instantly by ID or domain against the trusted certificate store.</p>
+          </article>
+          <article class="glass feature reveal">
+            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>
+            <h3>Certificate Revocation</h3>
+            <p>Revoke compromised certificates immediately and publish the change to the CRL.</p>
+          </article>
+          <article class="glass feature reveal">
+            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-lock"/></svg></div>
+            <h3>HTTPS Ready</h3>
+            <p>Drop-in PEM bundles compatible with Nginx, Apache, Traefik, Caddy and Node.js servers.</p>
+          </article>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PAGE: VERIFY
+       ============================================================ -->
+  <section id="page-verify" class="page">
+    <div class="container">
+      <div class="page-head">
+        <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-search"/></svg> Verification</span>
+        <h1>Verify Certificate</h1>
+        <p>Enter a certificate ID or domain name to validate its signature, chain of trust and current status.</p>
+      </div>
+      <div class="glass tool-card reveal">
+        <div class="search-row">
+          <div class="input-wrap"><svg class="ic"><use href="#i-shield-check"/></svg><input type="text" id="verify-input" placeholder="LS-XXXXXXXX or api.example.com" /></div>
+          <button class="btn btn-primary" id="verify-btn"><svg class="ic ic-sm"><use href="#i-check-circle"/></svg> Verify</button>
+        </div>
+        <div id="verify-result"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PAGE: STATUS
+       ============================================================ -->
+  <section id="page-status" class="page">
+    <div class="container">
+      <div class="page-head">
+        <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-clock"/></svg> Lifecycle</span>
+        <h1>Certificate Status</h1>
+        <p>Track the full lifecycle of any issued certificate and revoke it instantly if compromised.</p>
+      </div>
+      <div class="glass tool-card reveal">
+        <div class="search-row">
+          <div class="input-wrap"><svg class="ic"><use href="#i-cert"/></svg><input type="text" id="status-input" placeholder="Enter Certificate ID (LS-XXXXXXXX)" /></div>
+          <button class="btn btn-primary" id="status-btn"><svg class="ic ic-sm"><use href="#i-clock"/></svg> Check Status</button>
+        </div>
+        <div id="status-result"></div>
+      </div>
+      <div class="container" style="padding:0;max-width:820px;margin-top:44px">
+        <h3 style="font-size:1.05rem;margin-bottom:6px">Issued Certificates</h3>
+        <p style="color:var(--muted);font-size:.85rem">All certificates stored on the server.</p>
+        <div class="cert-list" id="status-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PAGE: DOWNLOAD
+       ============================================================ -->
+  <section id="page-download" class="page">
+    <div class="container">
+      <div class="page-head">
+        <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-download"/></svg> Export</span>
+        <h1>Download Certificate</h1>
+        <p>Export your signed certificate as a PEM bundle or CRT file, ready for your web server.</p>
+      </div>
+      <div class="glass tool-card reveal">
+        <div class="search-row">
+          <div class="input-wrap"><svg class="ic"><use href="#i-cert"/></svg><input type="text" id="download-input" placeholder="Enter Certificate ID (LS-XXXXXXXX)" /></div>
+          <button class="btn btn-primary" id="download-btn"><svg class="ic ic-sm"><use href="#i-download"/></svg> Load</button>
+        </div>
+        <div id="download-result"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PAGE: ADMIN
+       ============================================================ -->
+  <section id="page-admin" class="page">
+    <div class="container">
+      <div class="page-head">
+        <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-settings"/></svg> Administration</span>
+        <h1>Admin Panel</h1>
+        <p>Manage your private CA — create Root CA, list certificates, revoke or delete them, and view audit logs.</p>
+      </div>
+
+      <!-- Login form -->
+      <div class="glass admin-card reveal" id="admin-login-card">
+        <h3>Admin Login</h3>
+        <p class="sub">Sign in with your administrator credentials.</p>
+        <div class="field" data-field="admin-email">
+          <label for="admin-email">Email</label>
+          <div class="input-wrap"><svg class="ic"><use href="#i-mail"/></svg><input id="admin-email" type="email" placeholder="admin@example.com" autocomplete="username" /></div>
+        </div>
+        <div class="field" data-field="admin-password">
+          <label for="admin-password">Password</label>
+          <div class="input-wrap"><svg class="ic"><use href="#i-lock"/></svg><input id="admin-password" type="password" placeholder="••••••••" autocomplete="current-password" /></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="admin-login-btn"><svg class="ic ic-sm"><use href="#i-key"/></svg> Sign In</button>
+          <button class="btn btn-ghost" id="admin-logout-btn" style="display:none"><svg class="ic ic-sm"><use href="#i-log-out"/></svg> Sign Out</button>
+        </div>
+      </div>
+
+      <!-- Admin dashboard -->
+      <div id="admin-dashboard" style="display:none">
+        <div class="glass tool-card reveal" style="max-width:100%;margin-top:0">
+          <div class="admin-header">
+            <div>
+              <h2>Certificate Management</h2>
+              <p style="color:var(--muted);font-size:.85rem" id="admin-user-email"></p>
+            </div>
+            <span class="admin-badge"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg> Authenticated</span>
+          </div>
+
+          <div class="form-actions" style="margin-top:0;margin-bottom:20px">
+            <button class="btn btn-primary btn-sm" id="admin-create-root-btn"><svg class="ic ic-sm"><use href="#i-key"/></svg> Create Root CA</button>
+            <button class="btn btn-ghost btn-sm" id="admin-load-certs-btn"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> Reload Certificates</button>
+            <button class="btn btn-ghost btn-sm" id="admin-load-logs-btn"><svg class="ic ic-sm"><use href="#i-clock"/></svg> View Audit Logs</button>
+          </div>
+
+          <div id="admin-message"></div>
+
+          <div class="cert-list" id="admin-cert-list"></div>
+
+          <div id="admin-logs-container" style="margin-top:26px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b> Private CA</span>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a data-page="home">Home</a>
+      <a data-page="verify">Verify Certificate</a>
+      <a data-page="status">Certificate Status</a>
+      <a data-page="download">Download Certificate</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a data-goto="home" data-anchor="#request">Generate Certificate</a>
+      <a data-goto="home" data-anchor="#features">Features</a>
+      <a data-page="admin">Admin Panel</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year"></span> Let-S Secure Private CA — All rights reserved.</span>
+    <span>Powered by <b>Render</b> and <b>GitHub Pages</b></span>
+  </div>
+</footer>
+
+<!-- ===================== TOASTS ===================== -->
+<div class="toast-wrap" id="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ==========================================================
+     CONFIG — YOUR RENDER BACKEND
+     ========================================================== */
+  const API_BASE = "https://lets-secure-ca.onrender.com";
+
+  const API = {
+    root:        `${API_BASE}/`,
+    health:      `${API_BASE}/healthz`,
+    requestCert: `${API_BASE}/api/request-cert`,
+    verifyCert:  `${API_BASE}/api/verify-cert`,
+    status:      (id) => `${API_BASE}/api/status/${encodeURIComponent(id)}`,
+    download:    (id) => `${API_BASE}/api/cert/${encodeURIComponent(id)}`,
+    downloadJson:(id) => `${API_BASE}/api/cert/${encodeURIComponent(id)}/json`,
+    rootCaPem:   `${API_BASE}/api/root-ca.pem`,
+    adminLogin:  `${API_BASE}/api/admin/login`,
+    adminCreateRoot: `${API_BASE}/api/admin/create-root-ca`,
+    adminRootInfo:   `${API_BASE}/api/admin/root-ca`,
+    adminListCerts:  `${API_BASE}/api/admin/certificates`,
+    adminRevoke:     `${API_BASE}/api/admin/revoke-cert`,
+    adminDelete: (id) => `${API_BASE}/api/admin/certificate/${encodeURIComponent(id)}`,
+    adminAuditLogs:  `${API_BASE}/api/admin/audit-logs`,
+  };
+
+  /* ==========================================================
+     UTILITIES
+     ========================================================== */
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const YEAR_EL = $("#year");
+  if (YEAR_EL) YEAR_EL.textContent = new Date().getFullYear();
+
+  const fmtDate = (ts) => {
+    if (!ts) return "—";
+    try {
+      return new Date(ts).toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "2-digit",
+        hour: "2-digit", minute: "2-digit"
+      });
+    } catch { return String(ts); }
+  };
+
+  const escapeHtml = (s) =>
+    String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ==========================================================
+     API CLIENT
+     ========================================================== */
+  async function apiRequest(url, options = {}) {
+    const res = await fetch(url, {
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      ...options
+    });
+
+    let data = null;
+    const text = await res.text();
+    if (text) {
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+    }
+
+    if (!res.ok) {
+      const message = (data && (data.error || data.detail || data.message)) || `HTTP ${res.status}`;
+      const err = new Error(message);
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    return data;
+  }
+
+  const getToken = () => localStorage.getItem("ls_admin_token") || "";
+
+  async function apiAuth(url, options = {}) {
+    return apiRequest(url, {
+      ...options,
+      headers: { ...(options.headers || {}), Authorization: `Bearer ${getToken()}` }
+    });
+  }
+
+  const api = {
+    requestCert: (payload) =>
+      apiRequest(API.requestCert, { method: "POST", body: JSON.stringify(payload) }),
+
+    verifyCert: (payload) =>
+      apiRequest(API.verifyCert, { method: "POST", body: JSON.stringify(payload) }),
+
+    status: (id) => apiRequest(API.status(id)),
+
+    downloadPem: async (id) => {
+      const res = await fetch(API.download(id));
+      if (!res.ok) {
+        let msg = "Download failed";
+        try { const j = await res.json(); msg = j.error || msg; } catch {}
+        throw new Error(msg);
+      }
+      return res.text();
+    },
+
+    adminLogin: (email, password) =>
+      apiRequest(API.adminLogin, { method: "POST", body: JSON.stringify({ email, password }) }),
+
+    adminCreateRoot: () => apiAuth(API.adminCreateRoot, { method: "POST" }),
+    adminRootInfo: () => apiAuth(API.adminRootInfo),
+    adminListCerts: () => apiAuth(API.adminListCerts),
+    adminRevoke: (certId, reason) =>
+      apiAuth(API.adminRevoke, { method: "POST", body: JSON.stringify({ certId, reason }) }),
+    adminDelete: (id) => apiAuth(API.adminDelete(id), { method: "DELETE" }),
+    adminAuditLogs: () => apiAuth(API.adminAuditLogs),
+  };
+
+  /* ==========================================================
+     TOASTS
+     ========================================================== */
+  const toastWrap = $("#toast-wrap");
+  function toast(message, type = "info", ms = 3400) {
+    const el = document.createElement("div");
+    el.className = "toast " + type;
+    const icon = type === "ok" ? "i-check-circle" : type === "err" ? "i-x-circle" : "i-info";
+    el.innerHTML = '<svg class="ic ic-sm"><use href="#' + icon + '"/></svg><span>' + escapeHtml(message) + "</span>";
+    toastWrap.appendChild(el);
+    setTimeout(() => {
+      el.classList.add("out");
+      setTimeout(() => el.remove(), 380);
+    }, ms);
+  }
+
+  /* ==========================================================
+     ROUTER
+     ========================================================== */
+  const PAGES = ["home", "verify", "status", "download", "admin"];
+  let pendingAnchor = null;
+
+  function parseHash() {
+    const raw = (location.hash || "").replace(/^#\/?/, "").split("#")[0];
+    return PAGES.includes(raw) ? raw : "home";
+  }
+
+  function go(page, anchor) {
+    if (!PAGES.includes(page)) page = "home";
+    pendingAnchor = anchor || null;
+    const target = "#/" + page;
+    if (location.hash === target) render(page);
+    else location.hash = target;
+  }
+
+  function render(page) {
+    if (!PAGES.includes(page)) page = "home";
+
+    PAGES.forEach((p) => {
+      const el = document.getElementById("page-" + p);
+      if (el) el.classList.toggle("active", p === page);
+    });
+
+    $$(".nav-link").forEach((a) => a.classList.toggle("active", a.dataset.page === page));
+
+    const navLinks = $("#nav-links");
+    const menuBtn = $("#menu-btn");
+    if (navLinks) navLinks.classList.remove("open");
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (pendingAnchor) {
+      const anchor = pendingAnchor;
+      pendingAnchor = null;
+      setTimeout(() => {
+        const el = document.querySelector(anchor);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 180);
+    }
+
+    if (page === "status") refreshStatusList();
+    if (page === "admin") renderAdminState();
+
+    // Prefill verify input from cache
+    if (page === "verify") {
+      const ids = getCachedCertIds();
+      const vi = $("#verify-input");
+      if (vi && !vi.value && ids[0]) vi.value = ids[0];
+    }
+    if (page === "download") {
+      const ids = getCachedCertIds();
+      const di = $("#download-input");
+      if (di && !di.value && ids[0]) di.value = ids[0];
+    }
+  }
+
+  window.addEventListener("hashchange", () => render(parseHash()));
+
+  /* ==========================================================
+     MOBILE MENU
+     ========================================================== */
+  const menuBtn = $("#menu-btn");
+  const navLinks = $("#nav-links");
+  if (menuBtn && navLinks) {
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = navLinks.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("click", (e) => {
+      if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) {
+        navLinks.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  /* ==========================================================
+     NAVIGATION (data-goto, data-page, footer links)
+     ========================================================== */
+  document.addEventListener("click", (e) => {
+    const gotoEl = e.target.closest("[data-goto]");
+    if (gotoEl) {
+      e.preventDefault();
+      go(gotoEl.dataset.goto, gotoEl.dataset.anchor || null);
+      return;
+    }
+    const pageEl = e.target.closest("[data-page]");
+    if (pageEl) {
+      e.preventDefault();
+      go(pageEl.dataset.page);
+    }
+  });
+
+  /* ==========================================================
+     REVEAL
+     ========================================================== */
+  const revealObserver = ("IntersectionObserver" in window)
+    ? new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" })
+    : null;
+
+  function initReveal() {
+    $$(".grid-stagger").forEach((grid) => {
+      Array.from(grid.children).forEach((child, i) => {
+        child.style.transitionDelay = (i * 70) + "ms";
+      });
+    });
+    $$(".reveal").forEach((el) => {
+      if (revealObserver) revealObserver.observe(el);
+      else el.classList.add("visible");
+    });
+  }
+
+  /* ==========================================================
+     CERT CACHE (for UI convenience only)
+     ========================================================== */
+  const CACHE_KEY = "ls_cert_ids_v1";
+  function getCachedCertIds() {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  }
+  function cacheCertId(id) {
+    if (!id) return;
+    try {
+      const ids = getCachedCertIds();
+      if (!ids.includes(id)) {
+        ids.unshift(id);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(ids.slice(0, 50)));
+      }
+    } catch {}
+  }
+
+  /* ==========================================================
+     FORM VALIDATION
+     ========================================================== */
+  const DOMAIN_RE = /^(?!-)(?:[a-zA-Z0-9\u00a1-\uffff](?:[a-zA-Z0-9\u00a1-\uffff-]{0,61}[a-zA-Z0-9\u00a1-\uffff])?\.)+[a-zA-Z\u00a1-\uffff]{2,}$/;
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const CERT_ID_RE = /^LS-[A-Fa-f0-9]{8}$/;
+
+  function setFieldError(name, hasError) {
+    const field = document.querySelector('[data-field="' + name + '"]');
+    if (field) field.classList.toggle("invalid", !!hasError);
+  }
+  function clearErrors() {
+    $$(".field").forEach((f) => f.classList.remove("invalid"));
+  }
+
+  /* ==========================================================
+     ISSUE CERTIFICATE (Home form → Render API)
+     ========================================================== */
+  const form = $("#cert-form");
+  const resultBox = $("#issue-result");
+
+  const ISSUE_STEPS = [
+    "Validating request",
+    "Generating RSA-2048 key pair",
+    "Building X.509 v3 extensions",
+    "Signing with private CA key",
+    "Publishing to certificate store"
+  ];
+
+  function renderIssuing() {
+    const stepsHtml = ISSUE_STEPS.map((label, i) => (
+      '<div class="step" data-step="' + i + '">' +
+        '<span class="dot">' + (i + 1) + "</span>" +
+        "<span>" + label + "</span>" +
+      "</div>"
+    )).join("");
+    resultBox.innerHTML = '<div class="issuing"><h3>Issuing Certificate…</h3>' + stepsHtml + "</div>";
+  }
+
+  async function animateSteps() {
+    for (let i = 0; i < ISSUE_STEPS.length; i++) {
+      const el = resultBox.querySelector('[data-step="' + i + '"]');
+      if (!el) continue;
+      el.classList.add("active");
+      el.querySelector(".dot").innerHTML = '<span class="spinner"></span>';
+      await sleep(380);
+      el.classList.remove("active");
+      el.classList.add("done");
+      el.querySelector(".dot").innerHTML = "✓";
+    }
+    await sleep(200);
+  }
+
+  function renderIssued(cert) {
+    resultBox.innerHTML =
+      '<div class="issued-head">' +
+        '<div class="ok-ring"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
+        "<div><h3>Certificate Issued</h3><p>Signed by Let-S Secure Private CA</p></div>" +
+      "</div>" +
+      '<div class="data-list">' +
+        '<div class="data-row"><span class="k">Certificate ID</span><span class="v">' + escapeHtml(cert.certId) + "</span></div>" +
+        '<div class="data-row"><span class="k">Domain</span><span class="v">' + escapeHtml(cert.domain) + "</span></div>" +
+        '<div class="data-row"><span class="k">Project</span><span class="v">' + escapeHtml(cert.project) + "</span></div>" +
+        '<div class="data-row"><span class="k">Owner</span><span class="v">' + escapeHtml(cert.owner) + "</span></div>" +
+        '<div class="data-row"><span class="k">Serial</span><span class="v">' + escapeHtml(cert.serialNumber || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Valid Until</span><span class="v">' + escapeHtml(fmtDate(cert.expiresAt)) + "</span></div>" +
+      "</div>" +
+      (cert.fingerprint
+        ? '<div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:8px">SHA-256 Fingerprint</div>' +
+          '<div class="mono" style="font-size:.71rem;color:#7fa8d4;word-break:break-all;line-height:1.7;margin-bottom:20px">' + escapeHtml(cert.fingerprint) + "</div>"
+        : "") +
+      '<div class="form-actions" style="margin-top:0">' +
+        '<button class="btn btn-primary btn-sm" data-action="download-now" data-id="' + cert.certId + '"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download PEM</button>' +
+        '<button class="btn btn-ghost btn-sm" data-action="copy-id" data-id="' + cert.certId + '"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy ID</button>' +
+        '<button class="btn btn-ghost btn-sm" data-goto="verify" data-action="prefill-verify" data-id="' + cert.certId + '"><svg class="ic ic-sm"><use href="#i-check-circle"/></svg> Verify</button>' +
+      "</div>";
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const fd = new FormData(form);
+      const data = {
+        owner: String(fd.get("owner") || "").trim(),
+        project: String(fd.get("project") || "").trim(),
+        domain: String(fd.get("domain") || "").trim().toLowerCase()
+          .replace(/^https?:\/\//, "").replace(/\/.*$/, ""),
+        email: String(fd.get("email") || "").trim()
+      };
+
+      let valid = true;
+      if (data.owner.length < 2) { setFieldError("owner", true); valid = false; }
+      if (data.project.length < 2) { setFieldError("project", true); valid = false; }
+      if (!DOMAIN_RE.test(data.domain)) { setFieldError("domain", true); valid = false; }
+      if (!EMAIL_RE.test(data.email)) { setFieldError("email", true); valid = false; }
+
+      if (!valid) {
+        toast("Please correct the highlighted fields.", "err");
+        const firstBad = $(".field.invalid input");
+        if (firstBad) firstBad.focus();
+        return;
+      }
+
+      const btn = $("#issue-btn");
+      if (btn) btn.disabled = true;
+
+      renderIssuing();
+
+      try {
+        const apiPromise = api.requestCert(data);
+        await animateSteps();
+        const res = await apiPromise;
+        const cert = res.certificate;
+
+        cacheCertId(cert.certId);
+        renderIssued(cert);
+        toast("Certificate " + cert.certId + " issued successfully.", "ok");
+      } catch (err) {
+        console.error(err);
+        resultBox.innerHTML =
+          '<div class="verify-banner bad">' +
+            '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
+            "<div><h3>Issuance Failed</h3><p>" + escapeHtml(err.message || "The CA server could not issue the certificate.") + "</p></div>" +
+          "</div>" +
+          '<button class="btn btn-ghost btn-sm" data-action="retry-issue" style="margin-top:16px"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> Try Again</button>';
+        toast("Issuance failed: " + (err.message || "unknown error"), "err", 5000);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    form.addEventListener("reset", () => {
+      clearErrors();
+      resultBox.innerHTML =
+        '<div class="result-empty">' +
+          '<div class="ring"><svg class="ic ic-xl"><use href="#i-shield"/></svg></div>' +
+          "<h3>Awaiting Request</h3>" +
+          "<p>Your issued certificate, serial number and SHA-256 fingerprint will appear here.</p>" +
+        "</div>";
+    });
+  }
+
+  /* ==========================================================
+     GLOBAL ACTION DELEGATION
+     ========================================================== */
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+
+    if (action === "download-now") {
+      try {
+        const pem = await api.downloadPem(id);
+        downloadFile(id + ".pem", pem);
+        toast("Downloaded " + id + ".pem", "ok");
+      } catch (err) {
+        toast("Download failed: " + err.message, "err");
+      }
+    }
+
+    if (action === "copy-id") {
+      const ok = await copyText(id);
+      toast(ok ? "Certificate ID copied." : "Copy failed.", ok ? "ok" : "err");
+    }
+
+    if (action === "prefill-verify") {
+      const vi = $("#verify-input");
+      if (vi) vi.value = id;
+    }
+
+    if (action === "retry-issue") {
+      form.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+
+    if (action === "admin-revoke") {
+      const certId = btn.dataset.id;
+      if (!confirm("Revoke certificate " + certId + "? This cannot be undone.")) return;
+      btn.disabled = true;
+      try {
+        await api.adminRevoke(certId, "revoked via admin panel");
+        toast("Certificate " + certId + " revoked.", "err");
+        loadAdminCerts();
+      } catch (err) {
+        toast("Revoke failed: " + err.message, "err");
+        btn.disabled = false;
+      }
+    }
+
+    if (action === "admin-delete") {
+      const certId = btn.dataset.id;
+      if (!confirm("Delete certificate " + certId + " permanently?")) return;
+      btn.disabled = true;
+      try {
+        await api.adminDelete(certId);
+        toast("Certificate " + certId + " deleted.", "ok");
+        loadAdminCerts();
+      } catch (err) {
+        toast("Delete failed: " + err.message, "err");
+        btn.disabled = false;
+      }
+    }
+
+    if (action === "admin-view-status") {
+      const si = $("#status-input");
+      if (si) si.value = id;
+      go("status");
+    }
+  });
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(() => true).catch(() => fallbackCopy(text));
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return ok;
+    } catch { return false; }
+  }
+
+  function downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime || "application/x-pem-file" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+  }
+
+  /* ==========================================================
+     VERIFY PAGE → Render API
+     ========================================================== */
+  const verifyInput = $("#verify-input");
+  const verifyBtn = $("#verify-btn");
+  const verifyResult = $("#verify-result");
+
+  function certDataRows(cert) {
+    return (
+      '<div class="data-list">' +
+        '<div class="data-row"><span class="k">Certificate ID</span><span class="v">' + escapeHtml(cert.certId) + "</span></div>" +
+        '<div class="data-row"><span class="k">Common Name</span><span class="v">' + escapeHtml(cert.domain) + "</span></div>" +
+        '<div class="data-row"><span class="k">Organization</span><span class="v">' + escapeHtml(cert.project || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Owner</span><span class="v">' + escapeHtml(cert.owner || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Email</span><span class="v">' + escapeHtml(cert.email || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Serial Number</span><span class="v">' + escapeHtml(cert.serialNumber || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Issued</span><span class="v">' + escapeHtml(fmtDate(cert.issuedAt)) + "</span></div>" +
+        '<div class="data-row"><span class="k">Expires</span><span class="v">' + escapeHtml(fmtDate(cert.expiresAt)) + "</span></div>" +
+        '<div class="data-row"><span class="k">Status</span><span class="v">' + escapeHtml(cert.status || "—") + "</span></div>" +
+      "</div>" +
+      (cert.fingerprint
+        ? '<div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 8px">SHA-256 Fingerprint</div>' +
+          '<div class="mono" style="font-size:.71rem;color:#7fa8d4;word-break:break-all;line-height:1.7">' + escapeHtml(cert.fingerprint) + "</div>"
+        : "")
+    );
+  }
+
+  async function doVerify() {
+    const q = (verifyInput.value || "").trim();
+    if (!q) {
+      verifyResult.innerHTML =
+        '<div class="verify-result"><div class="verify-banner warn">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-info"/></svg></div>' +
+          "<div><h3>Input Required</h3><p>Enter a certificate ID or domain name to verify.</p></div>" +
+        "</div></div>";
+      toast("Enter a certificate ID or domain.", "err");
+      return;
+    }
+
+    verifyResult.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
+      '<div class="vb-icon"><span class="spinner"></span></div>' +
+      "<div><h3>Verifying…</h3><p>Contacting Let-S Secure CA</p></div></div></div>";
+
+    try {
+      let result, cert;
+      if (CERT_ID_RE.test(q)) {
+        result = await api.verifyCert({ certId: q.toUpperCase() });
+      } else if (DOMAIN_RE.test(q)) {
+        // Fall back to domain-based verification by looking up via public cert endpoint
+        // The backend exposes /api/certificates/domain/:domain
+        const res = await fetch(`${API_BASE}/api/certificates/domain/${encodeURIComponent(q.toLowerCase())}`);
+        if (!res.ok) {
+          throw new Error("No certificate found for that domain");
+        }
+        const j = await res.json();
+        cert = j.certificate;
+        result = { valid: cert.status === "active", reason: cert.status === "active" ? "" : "Certificate " + cert.status };
+      } else {
+        throw new Error("Enter a valid LS-XXXXXXXX ID or domain name");
+      }
+
+      if (!cert && result && result.valid !== undefined) {
+        // fetch metadata for display
+        const idMatch = q.match(CERT_ID_RE);
+        if (idMatch) {
+          try {
+            const sr = await api.status(q.toUpperCase());
+            cert = sr.certificate;
+          } catch {}
+        }
+      }
+
+      const expired = cert && cert.expiresAt && Date.now() > new Date(cert.expiresAt).getTime();
+      const revoked = cert && cert.status === "revoked";
+
+      let cls = "ok", icon = "i-check-circle", title = "Certificate is Valid",
+          msg = "Signature verified · Chain of trust intact · Issued by Let-S Secure Private CA";
+
+      if (revoked) {
+        cls = "bad"; icon = "i-x-circle"; title = "Certificate Revoked";
+        msg = "This certificate was revoked on " + fmtDate(cert.revokedAt) + " and must not be trusted.";
+      } else if (expired) {
+        cls = "warn"; icon = "i-clock"; title = "Certificate Expired";
+        msg = "This certificate expired on " + fmtDate(cert.expiresAt) + ".";
+      } else if (result && result.valid === false) {
+        cls = "bad"; icon = "i-x-circle"; title = "Certificate Invalid";
+        msg = result.reason || "The certificate failed verification.";
+      }
+
+      verifyResult.innerHTML =
+        '<div class="verify-result">' +
+          '<div class="verify-banner ' + cls + '">' +
+            '<div class="vb-icon"><svg class="ic ic-lg"><use href="#' + icon + '"/></svg></div>' +
+            "<div><h3>" + title + "</h3><p>" + escapeHtml(msg) + "</p></div>" +
+          "</div>" +
+          (cert ? certDataRows(cert) : "") +
+          (cert ? '<div class="form-actions">' +
+            '<button class="btn btn-ghost btn-sm" data-goto="status" data-action="prefill-status" data-id="' + cert.certId + '"><svg class="ic ic-sm"><use href="#i-clock"/></svg> View Status</button>' +
+            '<button class="btn btn-ghost btn-sm" data-goto="download" data-action="prefill-download" data-id="' + cert.certId + '"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download</button>' +
+          "</div>" : "") +
+        "</div>";
+
+      toast(result && result.valid ? "Certificate verified." : "Certificate is not valid.", result && result.valid ? "ok" : "err");
+    } catch (err) {
+      verifyResult.innerHTML =
+        '<div class="verify-result"><div class="verify-banner bad">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
+          "<div><h3>Verification Failed</h3><p>" + escapeHtml(err.message || "No matching certificate in the CA store.") + "</p></div>" +
+        "</div></div>";
+      toast("Verification failed: " + (err.message || "not found"), "err");
+    }
+  }
+
+  if (verifyBtn) verifyBtn.addEventListener("click", doVerify);
+  if (verifyInput) {
+    verifyInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); doVerify(); }
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    if (btn.dataset.action === "prefill-status") {
+      const i = $("#status-input"); if (i) i.value = btn.dataset.id;
+    }
+    if (btn.dataset.action === "prefill-download") {
+      const i = $("#download-input"); if (i) i.value = btn.dataset.id;
+    }
+  });
+
+  /* ==========================================================
+     STATUS PAGE → Render API
+     ========================================================== */
+  const statusInput = $("#status-input");
+  const statusBtn = $("#status-btn");
+  const statusResult = $("#status-result");
+  const statusList = $("#status-list");
+
+  function statusBadge(cert) {
+    if (cert.status === "revoked") return '<span class="chip chip-bad">Revoked</span>';
+    if (cert.expiresAt && Date.now() > new Date(cert.expiresAt).getTime()) return '<span class="chip chip-bad">Expired</span>';
+    return '<span class="chip chip-ok">Valid</span>';
+  }
+
+  function renderStatus(cert) {
+    const revoked = cert.status === "revoked";
+    const expired = cert.expiresAt && Date.now() > new Date(cert.expiresAt).getTime();
+
+    const timeline =
+      '<div class="timeline">' +
+        '<div class="tl-item"><span class="tl-dot"><svg class="ic ic-sm"><use href="#i-cert"/></svg></span>' +
+          "<div><strong>Request Received</strong><span>" + escapeHtml(fmtDate(cert.issuedAt)) + "</span></div></div>" +
+        '<div class="tl-item"><span class="tl-dot"><svg class="ic ic-sm"><use href="#i-key"/></svg></span>' +
+          "<div><strong>Certificate Issued</strong><span>" + escapeHtml(fmtDate(cert.issuedAt)) + "</span></div></div>" +
+        '<div class="tl-item ' + (revoked ? "revoked" : "") + '"><span class="tl-dot"><svg class="ic ic-sm"><use href="#' +
+          (revoked ? "i-x-circle" : "i-check-circle") + '"/></svg></span>' +
+          "<div><strong>" + (revoked ? "Revoked" : "Active") + "</strong><span>" +
+          (revoked ? escapeHtml(fmtDate(cert.revokedAt)) : "Currently trusted by the CA") + "</span></div></div>" +
+        '<div class="tl-item ' + (expired ? "revoked" : "") + '"><span class="tl-dot"><svg class="ic ic-sm"><use href="#i-clock"/></svg></span>' +
+          "<div><strong>" + (expired ? "Expired" : "Expires") + "</strong><span>" + escapeHtml(fmtDate(cert.expiresAt)) + "</span></div></div>" +
+      "</div>";
+
+    statusResult.innerHTML =
+      '<div class="verify-result">' +
+        '<div class="verify-banner ' + (revoked ? "bad" : expired ? "warn" : "ok") + '">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#' +
+            (revoked ? "i-x-circle" : expired ? "i-clock" : "i-shield-check") + '"/></svg></div>' +
+          "<div><h3>" + escapeHtml(cert.certId) + " — " + (revoked ? "Revoked" : expired ? "Expired" : "Active") + "</h3>" +
+          "<p>" + escapeHtml(cert.domain) + " · " + escapeHtml(cert.project || "—") + "</p></div>" +
+          '<div style="margin-left:auto">' + statusBadge(cert) + "</div>" +
+        "</div>" +
+        timeline +
+        '<div class="form-actions" style="margin-top:22px">' +
+          '<button class="btn btn-ghost btn-sm" data-goto="download" data-action="prefill-download" data-id="' + cert.certId + '"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download</button>' +
+        "</div>" +
+      "</div>";
+  }
+
+  async function doStatusCheck() {
+    const q = (statusInput.value || "").trim().toUpperCase();
+    if (!q) {
+      statusResult.innerHTML =
+        '<div class="verify-result"><div class="verify-banner warn">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-info"/></svg></div>' +
+          "<div><h3>Input Required</h3><p>Enter a certificate ID to check its status.</p></div>" +
+        "</div></div>";
+      toast("Enter a certificate ID.", "err");
+      return;
+    }
+    if (!CERT_ID_RE.test(q)) {
+      toast("Invalid certificate ID format (LS-XXXXXXXX).", "err");
+      return;
+    }
+
+    statusResult.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
+      '<div class="vb-icon"><span class="spinner"></span></div>' +
+      "<div><h3>Checking…</h3><p>Contacting Let-S Secure CA</p></div></div></div>";
+
+    try {
+      const res = await api.status(q);
+      renderStatus(res.certificate);
+    } catch (err) {
+      statusResult.innerHTML =
+        '<div class="verify-result"><div class="verify-banner bad">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
+          "<div><h3>Not Found</h3><p>" + escapeHtml(err.message || "No certificate with that ID.") + "</p></div>" +
+        "</div></div>";
+      toast("Certificate not found.", "err");
+    }
+  }
+
+  async function refreshStatusList() {
+    if (!statusList) return;
+    statusList.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading certificates…</div>';
+    // The public API has no list endpoint, so we only show cached IDs.
+    const ids = getCachedCertIds();
+    if (!ids.length) {
+      statusList.innerHTML = '<div class="empty-state">No certificates issued from this browser yet. Generate one from the Home page.</div>';
+      return;
+    }
+    try {
+      const results = await Promise.all(
+        ids.slice(0, 10).map((id) => api.status(id).then((r) => r.certificate).catch(() => null))
+      );
+      const certs = results.filter(Boolean);
+      if (!certs.length) {
+        statusList.innerHTML = '<div class="empty-state">No certificates issued from this browser yet. Generate one from the Home page.</div>';
+        return;
+      }
+      statusList.innerHTML = certs.map((c) => (
+        '<div class="glass cert-item">' +
+          '<div class="ci-icon"><svg class="ic ic-lg"><use href="#i-cert"/></svg></div>' +
+          '<div class="ci-main"><strong>' + escapeHtml(c.domain) + "</strong>" +
+            "<small>" + escapeHtml(c.certId) + " · " + escapeHtml(c.project || "—") + " · expires " + escapeHtml(fmtDate(c.expiresAt)) + "</small></div>" +
+          statusBadge(c) +
+          '<button class="btn btn-ghost btn-sm" data-action="prefill-status" data-id="' + c.certId + '">Details</button>' +
+        "</div>"
+      )).join("");
+    } catch (err) {
+      statusList.innerHTML = '<div class="empty-state">Could not load certificates: ' + escapeHtml(err.message) + "</div>";
+    }
+  }
+
+  if (statusBtn) statusBtn.addEventListener("click", doStatusCheck);
+  if (statusInput) {
+    statusInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); doStatusCheck(); }
+    });
+  }
+
+  /* ==========================================================
+     DOWNLOAD PAGE → Render API
+     ========================================================== */
+  const downloadInput = $("#download-input");
+  const downloadBtn = $("#download-btn");
+  const downloadResult = $("#download-result");
+
+  let loadedCert = null;
+  let loadedPem = "";
+
+  async function doDownloadLoad() {
+    const q = (downloadInput.value || "").trim().toUpperCase();
+    if (!q) {
+      downloadResult.innerHTML =
+        '<div class="verify-result"><div class="verify-banner warn">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-info"/></svg></div>' +
+          "<div><h3>Input Required</h3><p>Enter a certificate ID to load the bundle.</p></div>" +
+        "</div></div>";
+      toast("Enter a certificate ID.", "err");
+      return;
+    }
+    if (!CERT_ID_RE.test(q)) {
+      toast("Invalid certificate ID format (LS-XXXXXXXX).", "err");
+      return;
+    }
+
+    downloadResult.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
+      '<div class="vb-icon"><span class="spinner"></span></div>' +
+      "<div><h3>Loading…</h3><p>Fetching PEM bundle from CA</p></div></div></div>";
+
+    try {
+      const [statusRes, pem] = await Promise.all([
+        api.status(q).catch(() => null),
+        api.downloadPem(q).catch(() => "")
+      ]);
+      const cert = statusRes ? statusRes.certificate : { certId: q, domain: q, project: "—", expiresAt: null };
+      loadedCert = cert;
+      loadedPem = pem;
+      renderDownload(cert, pem);
+    } catch (err) {
+      downloadResult.innerHTML =
+        '<div class="verify-result"><div class="verify-banner bad">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
+          "<div><h3>Not Found</h3><p>" + escapeHtml(err.message || "No certificate with that ID.") + "</p></div>" +
+        "</div></div>";
+      toast("Certificate not found.", "err");
+    }
+  }
+
+  function renderDownload(cert, pem) {
+    downloadResult.innerHTML =
+      '<div class="verify-result">' +
+        '<div class="verify-banner ok">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
+          "<div><h3>" + escapeHtml(cert.domain || cert.certId) + "</h3>" +
+          "<p>" + escapeHtml(cert.certId) + " · " + escapeHtml(cert.project || "—") + (cert.expiresAt ? " · expires " + escapeHtml(fmtDate(cert.expiresAt)) : "") + "</p></div>" +
+        "</div>" +
+        (pem
+          ? '<div class="pem-box"><div class="pem-head"><span>certificate.pem</span><span>PEM · Base64</span></div>' +
+            '<div class="pem-body">' + escapeHtml(pem) + "</div></div>"
+          : "") +
+        '<div class="form-actions" style="margin-top:22px">' +
+          '<button class="btn btn-primary btn-sm" data-dl="pem"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .pem</button>' +
+          '<button class="btn btn-ghost btn-sm" data-dl="crt"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .crt</button>' +
+          '<button class="btn btn-ghost btn-sm" data-dl="copy"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy PEM</button>' +
+        "</div>" +
+      "</div>";
+  }
+
+  if (downloadBtn) downloadBtn.addEventListener("click", doDownloadLoad);
+  if (downloadInput) {
+    downloadInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); doDownloadLoad(); }
+    });
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-dl]");
+    if (!btn || !loadedCert) return;
+    const kind = btn.dataset.dl;
+
+    if (!loadedPem) {
+      try { loadedPem = await api.downloadPem(loadedCert.certId); }
+      catch (err) { toast("Download failed: " + err.message, "err"); return; }
+    }
+
+    if (kind === "pem") {
+      downloadFile(loadedCert.certId + ".pem", loadedPem);
+      toast("Downloaded " + loadedCert.certId + ".pem", "ok");
+    } else if (kind === "crt") {
+      downloadFile(loadedCert.certId + ".crt", loadedPem, "application/x-x509-ca-cert");
+      toast("Downloaded " + loadedCert.certId + ".crt", "ok");
+    } else if (kind === "copy") {
+      const ok = await copyText(loadedPem);
+      toast(ok ? "PEM copied to clipboard." : "Copy failed.", ok ? "ok" : "err");
+    }
+  });
+
+  /* ==========================================================
+     ADMIN PAGE
+     ========================================================== */
+  const adminLoginCard = $("#admin-login-card");
+  const adminDashboard = $("#admin-dashboard");
+  const adminLoginBtn = $("#admin-login-btn");
+  const adminLogoutBtn = $("#admin-logout-btn");
+  const adminUserEmail = $("#admin-user-email");
+
+  function isAdminLoggedIn() {
+    return !!getToken();
+  }
+
+  function renderAdminState() {
+    if (isAdminLoggedIn()) {
+      adminLoginCard.style.display = "none";
+      adminDashboard.style.display = "block";
+      const email = localStorage.getItem("ls_admin_email") || "admin";
+      if (adminUserEmail) adminUserEmail.textContent = email;
+      loadAdminCerts();
+    } else {
+      adminLoginCard.style.display = "block";
+      adminDashboard.style.display = "none";
+    }
+  }
+
+  if (adminLoginBtn) {
+    adminLoginBtn.addEventListener("click", async () => {
+      const email = ($("#admin-email").value || "").trim();
+      const password = $("#admin-password").value || "";
+      if (!email || !password) {
+        toast("Enter email and password.", "err");
+        return;
+      }
+      adminLoginBtn.disabled = true;
+      try {
+        const res = await api.adminLogin(email, password);
+        localStorage.setItem("ls_admin_token", res.token);
+        localStorage.setItem("ls_admin_email", res.user.email);
+        toast("Signed in as " + res.user.email, "ok");
+        renderAdminState();
+      } catch (err) {
+        toast("Login failed: " + err.message, "err");
+      } finally {
+        adminLoginBtn.disabled = false;
+      }
+    });
+  }
+
+  if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("ls_admin_token");
+      localStorage.removeItem("ls_admin_email");
+      toast("Signed out.", "info");
+      renderAdminState();
+    });
+  }
+
+  const adminMessage = $("#admin-message");
+  const adminCertList = $("#admin-cert-list");
+  const adminLogsContainer = $("#admin-logs-container");
+
+  async function loadAdminCerts() {
+    if (!isAdminLoggedIn() || !adminCertList) return;
+    adminCertList.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading certificates…</div>';
+    try {
+      const res = await api.adminListCerts();
+      const certs = res.certificates || [];
+      if (!certs.length) {
+        adminCertList.innerHTML = '<div class="empty-state">No certificates issued yet.</div>';
+        return;
+      }
+      adminCertList.innerHTML = certs.map((c) => (
+        '<div class="glass cert-item">' +
+          '<div class="ci-icon"><svg class="ic ic-lg"><use href="#i-cert"/></svg></div>' +
+          '<div class="ci-main"><strong>' + escapeHtml(c.domain) + "</strong>" +
+            "<small>" + escapeHtml(c.certId) + " · " + escapeHtml(c.owner || "—") + " · expires " + escapeHtml(fmtDate(c.expiresAt)) + "</small></div>" +
+          statusBadge(c) +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+            '<button class="btn btn-ghost btn-sm" data-action="admin-view-status" data-id="' + c.certId + '">Status</button>' +
+            (c.status !== "revoked"
+              ? '<button class="btn btn-danger btn-sm" data-action="admin-revoke" data-id="' + c.certId + '">Revoke</button>'
+              : "") +
+            '<button class="btn btn-danger btn-sm" data-action="admin-delete" data-id="' + c.certId + '">Delete</button>' +
+          "</div>" +
+        "</div>"
+      )).join("");
+    } catch (err) {
+      adminCertList.innerHTML = '<div class="empty-state">Could not load certificates: ' + escapeHtml(err.message) + "</div>";
+      if (err.status === 401) {
+        localStorage.removeItem("ls_admin_token");
+        renderAdminState();
+      }
+    }
+  }
+
+  const adminCreateRootBtn = $("#admin-create-root-btn");
+  if (adminCreateRootBtn) {
+    adminCreateRootBtn.addEventListener("click", async () => {
+      if (!isAdminLoggedIn()) return;
+      if (!confirm("Create the Root CA? This can only be done once.")) return;
+      adminCreateRootBtn.disabled = true;
+      adminMessage.innerHTML = '<div class="verify-banner warn"><div class="vb-icon"><span class="spinner"></span></div><div><h3>Generating Root CA…</h3><p>This takes 3–15 seconds. Please wait.</p></div></div>';
+      try {
+        const res = await api.adminCreateRoot();
+        adminMessage.innerHTML = '<div class="verify-banner ok"><div class="vb-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div><div><h3>Root CA Created</h3><p>Serial: ' + escapeHtml(res.rootCA.serialNumber) + '</p></div></div>';
+        toast("Root CA created successfully.", "ok");
+      } catch (err) {
+        adminMessage.innerHTML = '<div class="verify-banner bad"><div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div><div><h3>Failed</h3><p>' + escapeHtml(err.message) + "</p></div></div>";
+        toast("Root CA creation failed: " + err.message, "err", 5000);
+      } finally {
+        adminCreateRootBtn.disabled = false;
+      }
+    });
+  }
+
+  const adminLoadCertsBtn = $("#admin-load-certs-btn");
+  if (adminLoadCertsBtn) adminLoadCertsBtn.addEventListener("click", loadAdminCerts);
+
+  const adminLoadLogsBtn = $("#admin-load-logs-btn");
+  if (adminLoadLogsBtn) {
+    adminLoadLogsBtn.addEventListener("click", async () => {
+      if (!isAdminLoggedIn()) return;
+      adminLogsContainer.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading audit logs…</div>';
+      try {
+        const res = await api.adminAuditLogs();
+        const logs = res.logs || [];
+        if (!logs.length) {
+          adminLogsContainer.innerHTML = '<div class="empty-state">No audit logs yet.</div>';
+          return;
+        }
+        adminLogsContainer.innerHTML =
+          '<h3 style="font-size:1rem;margin-bottom:12px">Audit Logs</h3>' +
+          '<div style="overflow-x:auto"><table class="log-table"><thead><tr>' +
+            "<th>Time</th><th>Action</th><th>Actor</th><th>Target</th><th>Result</th>" +
+          "</tr></thead><tbody>" +
+          logs.map((l) => (
+            "<tr>" +
+              "<td>" + escapeHtml(fmtDate(l.timestamp)) + "</td>" +
+              '<td><span class="log-action">' + escapeHtml(l.action) + "</span></td>" +
+              "<td>" + escapeHtml(l.actor || "—") + "</td>" +
+              "<td>" + escapeHtml(l.target || "—") + "</td>" +
+              '<td class="' + (l.success ? "log-success" : "log-fail") + '">' + (l.success ? "✓" : "✗") + "</td>" +
+            "</tr>"
+          )).join("") +
+          "</tbody></table></div>";
+      } catch (err) {
+        adminLogsContainer.innerHTML = '<div class="empty-state">Could not load logs: ' + escapeHtml(err.message) + "</div>";
+      }
+    });
+  }
+
+  /* ==========================================================
+     INIT
+     ========================================================== */
+  initReveal();
+  render(parseHash());
+
+  // Prefill placeholders with cached IDs
+  const cachedIds = getCachedCertIds();
+  if (cachedIds.length && verifyInput) {
+    verifyInput.placeholder = "Try: " + cachedIds[0];
+  }
+  if (cachedIds.length && downloadInput) {
+    downloadInput.placeholder = "Try: " + cachedIds[0];
+  }
+})();
+</script>
+</body>
+</html>
