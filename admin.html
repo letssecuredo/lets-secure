@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Download Certificate — Let-S Secure</title>
+<title>Admin — Let-S Secure</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z' fill='none' stroke='%2338bdf8' stroke-width='1.7'/></svg>" />
 <link rel="stylesheet" href="assets/style.css" />
 </head>
-<body data-page="download">
+<body data-page="admin">
 
 <div class="bg" aria-hidden="true">
   <div class="grid-lines"></div>
@@ -29,8 +29,8 @@
       <a class="nav-link" href="index.html">Home</a>
       <a class="nav-link" href="verify.html">Verify</a>
       <a class="nav-link" href="status.html">Status</a>
-      <a class="nav-link active" href="download.html">Download</a>
-      <a class="nav-link" href="admin.html">Admin</a>
+      <a class="nav-link" href="download.html">Download</a>
+      <a class="nav-link active" href="admin.html">Admin</a>
     </div>
   </nav>
 </header>
@@ -38,22 +38,118 @@
 <main>
   <div class="container">
     <div class="page-head">
-      <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-download"/></svg> Export</span>
-      <h1>Download Certificate</h1>
-      <p>Export your signed certificate as PEM or CRT, ready for your web server.</p>
+      <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-settings"/></svg> Administration</span>
+      <h1>Admin Panel</h1>
+      <p>Manage your private CA — Root CA, certificates, pre-verified domains, audit logs.</p>
     </div>
 
-    <div class="glass tool-card reveal">
-      <div class="search-row">
-        <div class="input-wrap">
-          <svg class="ic"><use href="#i-cert"/></svg>
-          <input type="text" id="download-input" placeholder="Enter Certificate ID (LS-XXXXXXXX)" />
+    <!-- Login -->
+    <div class="glass admin-card reveal" id="admin-login-card">
+      <h3>Admin Login</h3>
+      <p class="sub">Sign in with your administrator credentials.</p>
+      <div class="field" data-field="admin-email">
+        <label for="admin-email">Email</label>
+        <div class="input-wrap"><svg class="ic"><use href="#i-mail"/></svg>
+          <input id="admin-email" type="email" placeholder="admin@example.com" autocomplete="username" />
         </div>
-        <button class="btn btn-primary" id="download-btn">
-          <svg class="ic ic-sm"><use href="#i-download"/></svg> Load
+      </div>
+      <div class="field" data-field="admin-password">
+        <label for="admin-password">Password</label>
+        <div class="input-wrap"><svg class="ic"><use href="#i-lock"/></svg>
+          <input id="admin-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="admin-login-btn">
+          <svg class="ic ic-sm"><use href="#i-key"/></svg> Sign In
         </button>
       </div>
-      <div id="download-result"></div>
+      <div id="admin-login-error"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="admin-dashboard" style="display:none">
+      <div class="glass tool-card reveal" style="max-width:100%;margin-top:0">
+        <div class="admin-header">
+          <div>
+            <h2>Administration</h2>
+            <p style="color:var(--muted);font-size:.85rem" id="admin-user-email"></p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span class="admin-badge"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg> Authenticated</span>
+            <button class="btn btn-ghost btn-sm" id="admin-logout-btn">
+              <svg class="ic ic-sm"><use href="#i-log-out"/></svg> Sign Out
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-tabs">
+          <div class="admin-tab active" data-tab="certs">Certificates</div>
+          <div class="admin-tab" data-tab="domains">Pre-verified Domains</div>
+          <div class="admin-tab" data-tab="rootca">Root CA</div>
+          <div class="admin-tab" data-tab="logs">Audit Logs</div>
+        </div>
+
+        <!-- TAB: Certificates -->
+        <div class="admin-panel active" data-panel="certs">
+          <div class="form-actions" style="margin-top:0;margin-bottom:20px">
+            <button class="btn btn-ghost btn-sm" id="reload-certs-btn">
+              <svg class="ic ic-sm"><use href="#i-refresh"/></svg> Reload Certificates
+            </button>
+          </div>
+          <div id="admin-certs-error"></div>
+          <div class="cert-list" id="admin-cert-list"></div>
+        </div>
+
+        <!-- TAB: Verified Domains -->
+        <div class="admin-panel" data-panel="domains">
+          <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">
+            Certificates for these patterns skip the challenge. Wildcards allowed: <code>*.example.com</code> or <code>*</code> for all.
+          </p>
+          <div class="search-row" style="margin-bottom:16px">
+            <div class="input-wrap">
+              <svg class="ic"><use href="#i-globe"/></svg>
+              <input type="text" id="verified-domain-input" placeholder="e.g. *.company.internal or *.titaniums.online" />
+            </div>
+            <button class="btn btn-primary btn-sm" id="add-verified-domain-btn">
+              <svg class="ic ic-sm"><use href="#i-plus"/></svg> Add Pattern
+            </button>
+          </div>
+          <div id="verified-domains-error"></div>
+          <div class="cert-list" id="verified-domains-list"></div>
+        </div>
+
+        <!-- TAB: Root CA -->
+        <div class="admin-panel" data-panel="rootca">
+          <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">
+            The Root CA can only be created once. It is the trust anchor for every certificate.
+          </p>
+          <div class="form-actions" style="margin-top:0;margin-bottom:20px">
+            <button class="btn btn-primary btn-sm" id="create-root-btn">
+              <svg class="ic ic-sm"><use href="#i-key"/></svg> Create Root CA
+            </button>
+            <button class="btn btn-ghost btn-sm" id="load-root-info-btn">
+              <svg class="ic ic-sm"><use href="#i-info"/></svg> Load Info
+            </button>
+            <a class="btn btn-ghost btn-sm" href="#" id="download-root-pem-link" target="_blank" rel="noopener">
+              <svg class="ic ic-sm"><use href="#i-download"/></svg> Download .pem
+            </a>
+          </div>
+          <div id="admin-rootca-error"></div>
+          <div id="admin-rootca-info"></div>
+        </div>
+
+        <!-- TAB: Audit Logs -->
+        <div class="admin-panel" data-panel="logs">
+          <div class="form-actions" style="margin-top:0;margin-bottom:20px">
+            <button class="btn btn-ghost btn-sm" id="reload-logs-btn">
+              <svg class="ic ic-sm"><use href="#i-refresh"/></svg> Reload Logs
+            </button>
+          </div>
+          <div id="admin-logs-error"></div>
+          <div id="admin-logs-container"></div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -87,141 +183,352 @@
 
 <script src="assets/app.js"></script>
 <script>
-window.LS_download = function () {
+window.LS_admin = function () {
   "use strict";
-  const { $, escapeHtml, fmtDate, toast, apiRequest, CERT_ID_RE,
-    renderAdvancedError, downloadFile, copyText } = LS;
+  const { $, $$, escapeHtml, fmtDate, toast, apiAuth, apiRequest,
+    getToken, setAuth, clearAuth, getAdminEmail,
+    renderAdvancedError, classifyError } = LS;
   const API = LS.API;
 
-  const input = $("#download-input");
-  const btn = $("#download-btn");
-  const out = $("#download-result");
+  /* ==========================================================
+     AUTH STATE
+     ========================================================== */
+  const loginCard = $("#admin-login-card");
+  const dashboard = $("#admin-dashboard");
 
-  let loadedCert = null;
-  let loadedPem = "";
+  function isLoggedIn() { return !!getToken(); }
 
-  async function fetchPem(id) {
-    const res = await fetch(API.download(id));
-    if (!res.ok) {
-      let msg = "Certificate not found";
-      try { const j = await res.json(); msg = j.error || msg; } catch {}
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
+  function renderState() {
+    if (isLoggedIn()) {
+      loginCard.style.display = "none";
+      dashboard.style.display = "block";
+      const email = getAdminEmail() || "admin";
+      const el = $("#admin-user-email"); if (el) el.textContent = email;
+      loadCerts();
+    } else {
+      loginCard.style.display = "block";
+      dashboard.style.display = "none";
     }
-    return res.text();
   }
 
-  async function load() {
-    const q = (input.value || "").trim().toUpperCase();
-    if (!q) {
-      out.innerHTML =
-        '<div class="verify-result"><div class="verify-banner warn">' +
-          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-info"/></svg></div>' +
-          "<div><h3>Input Required</h3><p>Enter a certificate ID to load the bundle.</p></div>" +
-        "</div></div>";
-      toast("Enter a certificate ID.", "err");
+  /* ==========================================================
+     LOGIN
+     ========================================================== */
+  const loginBtn = $("#admin-login-btn");
+  const loginErr = $("#admin-login-error");
+
+  async function doLogin() {
+    const email = ($("#admin-email").value || "").trim();
+    const password = $("#admin-password").value || "";
+    if (!email || !password) {
+      toast("Enter email and password.", "err");
       return;
     }
-    if (!CERT_ID_RE.test(q)) {
-      out.innerHTML =
-        '<div class="advanced-error">' +
-          '<div class="ae-head">' +
-            '<div class="ae-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
-            '<div><h4>Invalid certificate ID<span class="ae-code">BAD_FORMAT</span></h4>' +
-            "<p>Expected format: LS-XXXXXXXX</p></div>" +
-          "</div>" +
-          '<div class="ae-message">"' + escapeHtml(q) + '" is not a valid certificate ID.</div>' +
-        "</div>";
-      return;
-    }
-
-    btn.disabled = true;
-    out.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
-      '<div class="vb-icon"><span class="spinner"></span></div>' +
-      "<div><h3>Loading…</h3><p>Fetching PEM bundle from CA</p></div></div></div>";
-
+    loginBtn.disabled = true;
+    loginErr.innerHTML = "";
     try {
-      const [statusRes, pem] = await Promise.all([
-        apiRequest(API.status(q)).catch(() => null),
-        fetchPem(q).catch(() => ""),
-      ]);
-      const cert = statusRes ? statusRes.certificate : { certId: q, domain: q, project: "—", expiresAt: null };
-      loadedCert = cert;
-      loadedPem = pem;
-      renderDownload(cert, pem);
-    } catch (err) {
-      renderAdvancedError(out, err, {
-        retryAction: load,
-        retryLabel: "Retry",
+      const res = await apiRequest(API.adminLogin(), {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
       });
+      setAuth(res.token, res.user.email);
+      toast("Signed in as " + res.user.email, "ok");
+      renderState();
+    } catch (err) {
+      renderAdvancedError(loginErr, err, { retryAction: doLogin, retryLabel: "Retry Login" });
     } finally {
-      btn.disabled = false;
+      loginBtn.disabled = false;
     }
   }
 
-  function renderDownload(cert, pem) {
-    out.innerHTML =
-      '<div class="verify-result">' +
-        '<div class="verify-banner ok">' +
-          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
-          "<div><h3>" + escapeHtml(cert.domain || cert.certId) + "</h3>" +
-          "<p>" + escapeHtml(cert.certId) + " · " + escapeHtml(cert.project || "—") +
-          (cert.expiresAt ? " · expires " + escapeHtml(fmtDate(cert.expiresAt)) : "") + "</p></div>" +
-        "</div>" +
-        (pem
-          ? '<div class="pem-box">' +
-              '<div class="pem-head"><span>certificate.pem</span><span>PEM · Base64</span></div>' +
-              '<div class="pem-body">' + escapeHtml(pem) + "</div>" +
-            "</div>"
-          : '<div class="status-banner"><div class="sb-icon"><svg class="ic ic-sm"><use href="#i-info"/></svg></div>' +
-            "<p>The PEM bundle was not available. Click Download again to retry.</p></div>") +
-        '<div class="form-actions" style="margin-top:22px">' +
-          '<button class="btn btn-primary btn-sm" data-dl="pem"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .pem</button>' +
-          '<button class="btn btn-ghost btn-sm" data-dl="crt"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .crt</button>' +
-          '<button class="btn btn-ghost btn-sm" data-dl="copy"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy PEM</button>' +
-        "</div>" +
-      "</div>";
-  }
-
-  btn.addEventListener("click", load);
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); load(); }
+  loginBtn.addEventListener("click", doLogin);
+  $("#admin-password").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin();
   });
 
-  out.addEventListener("click", async (e) => {
-    const b = e.target.closest("[data-dl]");
-    if (!b || !loadedCert) return;
-    const kind = b.dataset.dl;
+  $("#admin-logout-btn").addEventListener("click", () => {
+    clearAuth();
+    toast("Signed out.", "info");
+    renderState();
+  });
 
-    if (!loadedPem) {
-      try { loadedPem = await fetchPem(loadedCert.certId); }
-      catch (err) {
-        renderAdvancedError(out, err, { retryAction: load, retryLabel: "Retry Load" });
+  /* ==========================================================
+     TABS
+     ========================================================== */
+  $$(".admin-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const name = tab.dataset.tab;
+      $$(".admin-tab").forEach((t) => t.classList.toggle("active", t === tab));
+      $$(".admin-panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === name));
+      if (name === "domains") loadVerifiedDomains();
+      if (name === "rootca") loadRootInfo();
+      if (name === "logs") loadLogs();
+    });
+  });
+
+  /* ==========================================================
+     CERTIFICATES
+     ========================================================== */
+  const certList = $("#admin-cert-list");
+  const certErr = $("#admin-certs-error");
+
+  function statusBadge(cert) {
+    if (cert.status === "revoked") return '<span class="chip chip-bad">Revoked</span>';
+    if (cert.expiresAt && Date.now() > new Date(cert.expiresAt).getTime()) return '<span class="chip chip-bad">Expired</span>';
+    return '<span class="chip chip-ok">Valid</span>';
+  }
+
+  async function loadCerts() {
+    if (!isLoggedIn()) return;
+    certErr.innerHTML = "";
+    certList.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading certificates…</div>';
+    try {
+      const res = await apiAuth(API.adminListCerts());
+      const certs = res.certificates || [];
+      if (!certs.length) {
+        certList.innerHTML = '<div class="empty-state">No certificates issued yet.</div>';
         return;
+      }
+      certList.innerHTML = certs.map((c) => (
+        '<div class="glass cert-item">' +
+          '<div class="ci-icon"><svg class="ic ic-lg"><use href="#i-cert"/></svg></div>' +
+          '<div class="ci-main"><strong>' + escapeHtml(c.domain) + "</strong>" +
+            "<small>" + escapeHtml(c.certId) + " · " + escapeHtml(c.owner || "—") + " · expires " + escapeHtml(fmtDate(c.expiresAt)) + "</small></div>" +
+          statusBadge(c) +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+            '<a class="btn btn-ghost btn-sm" href="status.html?id=' + encodeURIComponent(c.certId) + '">Status</a>' +
+            (c.status !== "revoked"
+              ? '<button class="btn btn-danger btn-sm" data-action="revoke" data-id="' + c.certId + '">Revoke</button>'
+              : "") +
+            '<button class="btn btn-danger btn-sm" data-action="delete" data-id="' + c.certId + '">Delete</button>' +
+          "</div>" +
+        "</div>"
+      )).join("");
+    } catch (err) {
+      if (err.status === 401) { clearAuth(); renderState(); return; }
+      renderAdvancedError(certErr, err, { retryAction: loadCerts, retryLabel: "Reload" });
+    }
+  }
+
+  $("#reload-certs-btn").addEventListener("click", loadCerts);
+
+  certList.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+
+    if (action === "revoke") {
+      if (!confirm("Revoke certificate " + id + "? This cannot be undone.")) return;
+      btn.disabled = true;
+      try {
+        await apiAuth(API.adminRevoke(), {
+          method: "POST",
+          body: JSON.stringify({ certId: id, reason: "revoked via admin panel" }),
+        });
+        toast("Certificate " + id + " revoked.", "err");
+        loadCerts();
+      } catch (err) {
+        renderAdvancedError(certErr, err, { retryAction: loadCerts, retryLabel: "Reload" });
+        btn.disabled = false;
       }
     }
 
-    if (kind === "pem") {
-      downloadFile(loadedCert.certId + ".pem", loadedPem);
-      toast("Downloaded " + loadedCert.certId + ".pem", "ok");
-    } else if (kind === "crt") {
-      downloadFile(loadedCert.certId + ".crt", loadedPem, "application/x-x509-ca-cert");
-      toast("Downloaded " + loadedCert.certId + ".crt", "ok");
-    } else if (kind === "copy") {
-      const ok = await copyText(loadedPem);
-      toast(ok ? "PEM copied to clipboard." : "Copy failed.", ok ? "ok" : "err");
+    if (action === "delete") {
+      if (!confirm("Delete certificate " + id + " permanently?")) return;
+      btn.disabled = true;
+      try {
+        await apiAuth(API.adminDelete(id), { method: "DELETE" });
+        toast("Certificate " + id + " deleted.", "ok");
+        loadCerts();
+      } catch (err) {
+        renderAdvancedError(certErr, err, { retryAction: loadCerts, retryLabel: "Reload" });
+        btn.disabled = false;
+      }
     }
   });
 
-  const params = new URLSearchParams(location.search);
-  if (params.get("id")) {
-    input.value = params.get("id").toUpperCase();
-    load();
-  } else {
-    const ids = LS.getCachedCertIds();
-    if (ids[0]) input.placeholder = "Try: " + ids[0];
+  /* ==========================================================
+     VERIFIED DOMAINS
+     ========================================================== */
+  const domList = $("#verified-domains-list");
+  const domErr = $("#verified-domains-error");
+  const domInput = $("#verified-domain-input");
+  const addDomBtn = $("#add-verified-domain-btn");
+
+  async function loadVerifiedDomains() {
+    if (!isLoggedIn()) return;
+    domErr.innerHTML = "";
+    domList.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading…</div>';
+    try {
+      const res = await apiAuth(API.adminVerifiedDomains());
+      const domains = res.domains || [];
+      if (!domains.length) {
+        domList.innerHTML = '<div class="empty-state">No pre-verified domains yet. Every request requires a challenge.</div>';
+        return;
+      }
+      domList.innerHTML = domains.map((d) => (
+        '<div class="glass cert-item">' +
+          '<div class="ci-icon"><svg class="ic ic-lg"><use href="#i-globe"/></svg></div>' +
+          '<div class="ci-main"><strong>' + escapeHtml(d.pattern) + "</strong>" +
+            "<small>Added by " + escapeHtml(d.createdBy || "—") + " · " + escapeHtml(fmtDate(d.createdAt)) + "</small></div>" +
+          '<button class="btn btn-danger btn-sm" data-action="remove-domain" data-id="' + d.id + '">Remove</button>' +
+        "</div>"
+      )).join("");
+    } catch (err) {
+      renderAdvancedError(domErr, err, { retryAction: loadVerifiedDomains, retryLabel: "Reload" });
+    }
   }
+
+  addDomBtn.addEventListener("click", async () => {
+    const pattern = (domInput.value || "").trim().toLowerCase();
+    if (!pattern) { toast("Enter a domain pattern.", "err"); return; }
+    addDomBtn.disabled = true;
+    domErr.innerHTML = "";
+    try {
+      await apiAuth(API.adminVerifiedDomains(), {
+        method: "POST",
+        body: JSON.stringify({ pattern }),
+      });
+      domInput.value = "";
+      toast("Added: " + pattern, "ok");
+      loadVerifiedDomains();
+    } catch (err) {
+      renderAdvancedError(domErr, err, {
+        retryAction: () => addDomBtn.click(),
+        retryLabel: "Retry Add",
+      });
+    } finally {
+      addDomBtn.disabled = false;
+    }
+  });
+
+  domInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addDomBtn.click();
+  });
+
+  domList.addEventListener("click", async (e) => {
+    const btn = e.target.closest('[data-action="remove-domain"]');
+    if (!btn) return;
+    if (!confirm("Remove this pre-verified pattern?")) return;
+    btn.disabled = true;
+    try {
+      await apiAuth(API.adminVerifiedDomainDelete(btn.dataset.id), { method: "DELETE" });
+      toast("Removed.", "ok");
+      loadVerifiedDomains();
+    } catch (err) {
+      renderAdvancedError(domErr, err, { retryAction: loadVerifiedDomains, retryLabel: "Reload" });
+      btn.disabled = false;
+    }
+  });
+
+  /* ==========================================================
+     ROOT CA
+     ========================================================== */
+  const rootErr = $("#admin-rootca-error");
+  const rootInfo = $("#admin-rootca-info");
+  const createBtn = $("#create-root-btn");
+
+  async function loadRootInfo() {
+    if (!isLoggedIn()) return;
+    rootErr.innerHTML = "";
+    rootInfo.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading…</div>';
+    try {
+      const res = await apiAuth(API.adminRootInfo());
+      const r = res.rootCA;
+      rootInfo.innerHTML =
+        '<div class="verify-banner ok">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></div>' +
+          "<div><h3>Root CA Active</h3><p>Serial: " + escapeHtml(r.serialNumber) + "</p></div>" +
+        "</div>" +
+        '<div class="data-list">' +
+          '<div class="data-row"><span class="k">Common Name</span><span class="v">' + escapeHtml(r.subject?.commonName || "—") + "</span></div>" +
+          '<div class="data-row"><span class="k">Organization</span><span class="v">' + escapeHtml(r.subject?.organization || "—") + "</span></div>" +
+          '<div class="data-row"><span class="k">Serial</span><span class="v">' + escapeHtml(r.serialNumber) + "</span></div>" +
+          '<div class="data-row"><span class="k">Algorithm</span><span class="v">' + escapeHtml(r.algorithm || "—") + "</span></div>" +
+          '<div class="data-row"><span class="k">Validity</span><span class="v">' + escapeHtml(String(r.validityDays || "—")) + " days</span></div>" +
+          '<div class="data-row"><span class="k">Created</span><span class="v">' + escapeHtml(fmtDate(r.createdAt)) + "</span></div>" +
+        "</div>" +
+        '<div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:8px">SHA-256 Fingerprint</div>' +
+        '<div class="mono" style="font-size:.71rem;color:#7fa8d4;word-break:break-all;line-height:1.7">' + escapeHtml(r.fingerprint || "—") + "</div>";
+    } catch (err) {
+      if (err.status === 401) { clearAuth(); renderState(); return; }
+      if (err.status === 404) {
+        rootInfo.innerHTML = '<div class="empty-state">Root CA has not been created yet. Click <b>Create Root CA</b> above.</div>';
+        return;
+      }
+      renderAdvancedError(rootErr, err, { retryAction: loadRootInfo, retryLabel: "Reload" });
+    }
+  }
+
+  createBtn.addEventListener("click", async () => {
+    if (!confirm("Create the Root CA? This can only be done once.")) return;
+    createBtn.disabled = true;
+    rootErr.innerHTML = "";
+    rootInfo.innerHTML = '<div class="verify-banner warn">' +
+      '<div class="vb-icon"><span class="spinner"></span></div>' +
+      "<div><h3>Generating Root CA…</h3><p>RSA-4096 keypair. This takes 3–15 seconds. Do not refresh.</p></div></div>";
+    try {
+      const res = await apiAuth(API.adminCreateRoot(), { method: "POST", timeoutMs: 60000 });
+      toast("Root CA created successfully.", "ok");
+      loadRootInfo();
+    } catch (err) {
+      renderAdvancedError(rootErr, err, {
+        retryAction: () => createBtn.click(),
+        retryLabel: "Retry Create",
+      });
+      rootInfo.innerHTML = "";
+    } finally {
+      createBtn.disabled = false;
+    }
+  });
+
+  $("#load-root-info-btn").addEventListener("click", loadRootInfo);
+  $("#download-root-pem-link").href = API.rootCaPem();
+
+  /* ==========================================================
+     AUDIT LOGS
+     ========================================================== */
+  const logsErr = $("#admin-logs-error");
+  const logsBox = $("#admin-logs-container");
+
+  async function loadLogs() {
+    if (!isLoggedIn()) return;
+    logsErr.innerHTML = "";
+    logsBox.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading audit logs…</div>';
+    try {
+      const res = await apiAuth(API.adminAuditLogs());
+      const logs = res.logs || [];
+      if (!logs.length) {
+        logsBox.innerHTML = '<div class="empty-state">No audit logs yet.</div>';
+        return;
+      }
+      logsBox.innerHTML =
+        '<div style="overflow-x:auto"><table class="log-table"><thead><tr>' +
+          "<th>Time</th><th>Action</th><th>Actor</th><th>Target</th><th>Result</th>" +
+        "</tr></thead><tbody>" +
+        logs.map((l) => (
+          "<tr>" +
+            "<td>" + escapeHtml(fmtDate(l.timestamp)) + "</td>" +
+            '<td><span class="log-action">' + escapeHtml(l.action) + "</span></td>" +
+            "<td>" + escapeHtml(l.actor || "—") + "</td>" +
+            "<td>" + escapeHtml(l.target || "—") + "</td>" +
+            '<td class="' + (l.success ? "log-success" : "log-fail") + '">' + (l.success ? "✓" : "✗") + "</td>" +
+          "</tr>"
+        )).join("") +
+        "</tbody></table></div>";
+    } catch (err) {
+      if (err.status === 401) { clearAuth(); renderState(); return; }
+      renderAdvancedError(logsErr, err, { retryAction: loadLogs, retryLabel: "Reload Logs" });
+    }
+  }
+
+  $("#reload-logs-btn").addEventListener("click", loadLogs);
+
+  /* ==========================================================
+     BOOT
+     ========================================================== */
+  renderState();
 };
 </script>
 </body>
