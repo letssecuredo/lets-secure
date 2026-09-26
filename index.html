@@ -32,15 +32,9 @@
 html{scroll-behavior:smooth}
 body{
   font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.6;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
+  background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;
+  display:flex;flex-direction:column;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
 }
 img,svg{display:block;max-width:100%}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -82,10 +76,9 @@ main{flex:1}
 .section{padding:76px 0}
 .section-head{max-width:660px;margin:0 auto 44px;text-align:center}
 .eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--accent);background:rgba(56,189,248,.09);
-  border:1px solid rgba(56,189,248,.25);
+  display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+  background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.25);
   padding:6px 14px;border-radius:999px;margin-bottom:16px;
 }
 h1,h2,h3{line-height:1.18;letter-spacing:-.02em;font-weight:800}
@@ -99,7 +92,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 }
 .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(140deg,rgba(255,255,255,.07),transparent 42%);opacity:.85}
 
-/* Icons */
 .ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .ic-sm{width:16px;height:16px}
 .ic-lg{width:26px;height:26px}
@@ -108,11 +100,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 /* ============================================================
    HEADER
    ============================================================ */
-.site-header{
-  position:sticky;top:0;z-index:120;background:rgba(11,16,32,.72);
-  -webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
-  border-bottom:1px solid var(--line);
-}
+.site-header{position:sticky;top:0;z-index:120;background:rgba(11,16,32,.72);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--line)}
 .nav{max-width:var(--max);margin-inline:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
 .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
 .brand-mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;box-shadow:0 0 22px rgba(31,111,235,.6),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
@@ -150,6 +138,8 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .btn-ghost:hover{transform:translateY(-3px);border-color:rgba(56,189,248,.55);background:rgba(56,189,248,.1);box-shadow:0 14px 34px -16px rgba(56,189,248,.9)}
 .btn-danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.42);color:#fca5a5}
 .btn-danger:hover{background:rgba(239,68,68,.22);transform:translateY(-3px);box-shadow:0 14px 34px -16px rgba(239,68,68,.9)}
+.btn-success{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.45);color:#86efac}
+.btn-success:hover{background:rgba(34,197,94,.24);transform:translateY(-3px)}
 .btn[disabled]{opacity:.5;pointer-events:none}
 
 /* Hero */
@@ -178,6 +168,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .chip-ok{color:#6ee7a8;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35)}
 .chip-bad{color:#fca5a5;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35)}
 .chip-warn{color:#fcd34d;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35)}
+.chip-info{color:var(--accent);background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35)}
 .cert-mock-body{padding:16px 0;display:grid;gap:11px}
 .kv{display:flex;justify-content:space-between;gap:14px;font-size:.83rem;align-items:center}
 .kv span{color:var(--muted)}
@@ -194,6 +185,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .input-wrap{position:relative;display:flex;align-items:center}
 .input-wrap .ic{position:absolute;left:14px;color:#54657f;pointer-events:none;transition:color .25s}
 .field input,.field select{width:100%;padding:13px 15px 13px 44px;border-radius:13px;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.93rem;transition:border-color .25s,box-shadow .25s,background .25s}
+.field select{padding-left:44px;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 16px center}
 .field input::placeholder{color:#4a5a73}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent);background:rgba(8,12,24,.95);box-shadow:0 0 0 4px rgba(56,189,248,.14),0 0 22px -8px rgba(56,189,248,.85)}
 .input-wrap:focus-within .ic{color:var(--accent)}
@@ -213,7 +205,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .issued-head h3{font-size:1.08rem}
 .issued-head p{font-size:.8rem;color:var(--muted)}
 .data-list{display:grid;gap:1px;background:rgba(255,255,255,.06);border-radius:14px;overflow:hidden;margin-bottom:20px}
-.data-row{display:flex;justify-content:space-between;gap:14px;align-items:center;background:rgba(11,16,32,.72);padding:12px 15px;font-size:.83rem}
+.data-row{display:flex;justify-content:space-between;gap:14px;align-items:center;background:rgba(11,16,32,.72);padding:12px 15px;font-size:.83rem;flex-wrap:wrap}
 .data-row .k{color:var(--muted);flex:none}
 .data-row .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;text-align:right;word-break:break-all}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -228,6 +220,31 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(56,189,248,.28);border-top-color:var(--accent);animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* Challenge panel */
+.challenge-panel{padding:6px 0}
+.challenge-panel .c-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.challenge-panel .c-icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;flex:none;background:rgba(56,189,248,.13);border:1px solid rgba(56,189,248,.4);color:var(--accent);box-shadow:0 0 30px -8px rgba(56,189,248,.75)}
+.challenge-panel .c-head h3{font-size:1.05rem}
+.challenge-panel .c-head p{font-size:.83rem;color:var(--muted)}
+
+.challenge-instruction{padding:16px;border-radius:14px;background:rgba(8,12,24,.72);border:1px solid rgba(56,189,248,.25);margin-bottom:18px}
+.challenge-instruction .label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px}
+.challenge-instruction .value{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.83rem;color:#8fb7e0;word-break:break-all;line-height:1.6}
+
+.record-table{display:grid;gap:1px;background:rgba(255,255,255,.06);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.record-row{display:flex;justify-content:space-between;gap:14px;align-items:center;background:rgba(11,16,32,.72);padding:11px 14px;font-size:.8rem;flex-wrap:wrap}
+.record-row .k{color:var(--muted);flex:none;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.record-row .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;color:#a5b7d1;text-align:right;word-break:break-all;flex:1;min-width:120px}
+
+.challenge-timer{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--muted);margin-bottom:18px}
+.challenge-timer b{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92rem}
+
+.challenge-hint{padding:14px 16px;border-radius:12px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);font-size:.8rem;color:#a9b6cd;line-height:1.65;margin-bottom:18px}
+.challenge-hint b{color:var(--accent)}
+
+.challenge-error{padding:14px 16px;border-radius:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);font-size:.82rem;color:#fca5a5;line-height:1.6;margin-bottom:16px;word-break:break-word}
+.challenge-error strong{display:block;margin-bottom:4px;color:#fecaca}
+
 /* Features */
 .features-grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(232px,1fr))}
 .feature{padding:26px 22px;transition:transform .45s var(--ease),border-color .45s,box-shadow .45s}
@@ -239,104 +256,27 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .feature::before{content:"";position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.65),transparent);opacity:0;transition:opacity .45s}
 .feature:hover::before{opacity:1}
 
-/* ============================================================
-   ROOT CA DOWNLOAD SECTION
-   ============================================================ */
-.root-ca-card {
-  padding: 28px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.root-ca-icon {
-  width: 76px;
-  height: 76px;
-  border-radius: 22px;
-  display: grid;
-  place-items: center;
-  flex: none;
-  background: linear-gradient(140deg, rgba(31,111,235,.25), rgba(124,58,237,.25));
-  border: 1px solid rgba(56,189,248,.35);
-  color: var(--accent);
-  box-shadow: 0 0 40px -12px rgba(56,189,248,.7);
-  animation: rcPulse 3s ease-in-out infinite;
-}
-@keyframes rcPulse {
-  0%,100% { box-shadow: 0 0 40px -12px rgba(56,189,248,.7); }
-  50%     { box-shadow: 0 0 50px -8px rgba(56,189,248,.95); }
-}
-.root-ca-info { flex: 1; min-width: 220px; }
-.root-ca-info h3 { font-size: 1.15rem; margin-bottom: 6px; }
-.root-ca-info > p { color: var(--muted); font-size: .86rem; margin-bottom: 14px; }
-.root-ca-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-}
-.rc-meta-item { display: flex; flex-direction: column; gap: 2px; }
-.rc-key {
-  font-size: .68rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  font-weight: 700;
-}
-.rc-val {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: .78rem;
-  color: #a5b7d1;
-}
-.root-ca-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+/* Root CA download section */
+.root-ca-card{padding:28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.root-ca-icon{width:76px;height:76px;border-radius:22px;display:grid;place-items:center;flex:none;background:linear-gradient(140deg,rgba(31,111,235,.25),rgba(124,58,237,.25));border:1px solid rgba(56,189,248,.35);color:var(--accent);box-shadow:0 0 40px -12px rgba(56,189,248,.7);animation:rcPulse 3s ease-in-out infinite}
+@keyframes rcPulse{0%,100%{box-shadow:0 0 40px -12px rgba(56,189,248,.7)}50%{box-shadow:0 0 50px -8px rgba(56,189,248,.95)}}
+.root-ca-info{flex:1;min-width:220px}
+.root-ca-info h3{font-size:1.15rem;margin-bottom:6px}
+.root-ca-info>p{color:var(--muted);font-size:.86rem;margin-bottom:14px}
+.root-ca-meta{display:flex;flex-wrap:wrap;gap:20px;padding-top:12px;border-top:1px solid var(--line)}
+.rc-meta-item{display:flex;flex-direction:column;gap:2px}
+.rc-key{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.rc-val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;color:#a5b7d1}
+.root-ca-actions{display:flex;gap:10px;flex-wrap:wrap}
+.root-ca-install-hint{margin-top:26px;padding:24px}
+.root-ca-install-hint h4{font-size:.95rem;margin-bottom:16px;color:#cbd5e1}
+.install-steps-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.install-step-card{padding:14px 16px;border-radius:12px;background:rgba(8,12,24,.6);border:1px solid var(--line);transition:border-color .25s,transform .25s}
+.install-step-card:hover{border-color:rgba(56,189,248,.4);transform:translateY(-2px)}
+.install-step-card strong{display:block;font-size:.82rem;margin-bottom:6px;color:var(--accent)}
+.install-step-card p{font-size:.76rem;color:var(--muted);line-height:1.6;word-break:break-word}
 
-.root-ca-install-hint {
-  margin-top: 26px;
-  padding: 24px;
-}
-.root-ca-install-hint h4 {
-  font-size: .95rem;
-  margin-bottom: 16px;
-  color: #cbd5e1;
-}
-.install-steps-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-.install-step-card {
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: rgba(8,12,24,.6);
-  border: 1px solid var(--line);
-  transition: border-color .25s, transform .25s;
-}
-.install-step-card:hover {
-  border-color: rgba(56,189,248,.4);
-  transform: translateY(-2px);
-}
-.install-step-card strong {
-  display: block;
-  font-size: .82rem;
-  margin-bottom: 6px;
-  color: var(--accent);
-}
-.install-step-card p {
-  font-size: .76rem;
-  color: var(--muted);
-  line-height: 1.6;
-  word-break: break-word;
-}
-
-@media (max-width: 640px) {
-  .root-ca-card { padding: 22px 18px; }
-  .root-ca-icon { width: 64px; height: 64px; border-radius: 18px; }
-  .root-ca-actions .btn { width: 100%; }
-  .root-ca-install-hint { padding: 20px 16px; }
-}
-
-/* Page head + tools */
+/* Page heads */
 .page-head{padding:60px 0 8px;text-align:center}
 .page-head h1{font-size:clamp(1.75rem,4.2vw,2.6rem);margin-bottom:12px}
 .page-head p{color:var(--muted);max-width:590px;margin-inline:auto;font-size:.98rem}
@@ -441,6 +381,12 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   .footer-bottom{justify-content:center;text-align:center}
   .toast-wrap{left:16px;right:16px;justify-items:stretch}
   .toast{max-width:none}
+  .root-ca-card{padding:22px 18px}
+  .root-ca-icon{width:64px;height:64px;border-radius:18px}
+  .root-ca-actions .btn{width:100%}
+  .root-ca-install-hint{padding:20px 16px}
+  .record-row{flex-direction:column;align-items:flex-start;gap:6px}
+  .record-row .v{text-align:left}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
@@ -500,7 +446,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       <a class="nav-link" href="#/verify" data-page="verify">Verify</a>
       <a class="nav-link" href="#/status" data-page="status">Status</a>
       <a class="nav-link" href="#/download" data-page="download">Download</a>
-      <a class="nav-link" href="#/admin" data-page="admin" id="admin-nav-link">Admin</a>
+      <a class="nav-link" href="#/admin" data-page="admin">Admin</a>
       <button class="btn btn-primary btn-sm nav-cta" data-goto="home" data-anchor="#request">
         <svg class="ic ic-sm"><use href="#i-plus"/></svg> Generate
       </button>
@@ -529,10 +475,10 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
             </button>
           </div>
           <div class="trust">
-            <div class="trust-item"><strong>2048-bit</strong><span>RSA Keys</span></div>
+            <div class="trust-item"><strong>DNS-01</strong><span>Verified</span></div>
+            <div class="trust-item"><strong>HTTP-01</strong><span>Verified</span></div>
             <div class="trust-item"><strong>SHA-256</strong><span>Signatures</span></div>
             <div class="trust-item"><strong>365 days</strong><span>Validity</span></div>
-            <div class="trust-item"><strong>OCSP</strong><span>Revocation</span></div>
           </div>
         </div>
         <div class="hero-visual reveal">
@@ -559,13 +505,13 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       <section class="section" id="request">
         <div class="section-head reveal">
           <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-cert"/></svg> Certificate Request</span>
-          <h2>Generate a Private Certificate</h2>
-          <p>Submit your project details and our private CA will issue a signed X.509 certificate instantly.</p>
+          <h2>Generate a Verified Certificate</h2>
+          <p>Prove you own the domain through a DNS record or an HTTP file, then receive a signed X.509 certificate.</p>
         </div>
         <div class="request-grid">
           <form class="glass form-card reveal" id="cert-form" novalidate>
             <h3>Certificate Signing Request</h3>
-            <p class="sub">All fields are required. Data is signed by the Render-backed CA.</p>
+            <p class="sub">All fields are required. Domain ownership will be verified before issuance.</p>
             <div class="field" data-field="owner">
               <label for="f-owner">Owner Name</label>
               <div class="input-wrap"><svg class="ic"><use href="#i-user"/></svg><input id="f-owner" name="owner" type="text" placeholder="e.g. Aditya Sharma" autocomplete="name" /></div>
@@ -586,9 +532,18 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
               <div class="input-wrap"><svg class="ic"><use href="#i-mail"/></svg><input id="f-email" name="email" type="email" placeholder="e.g. security@nebula.dev" autocomplete="email" /></div>
               <span class="err">Enter a valid email address.</span>
             </div>
+            <div class="field" data-field="method">
+              <label for="f-method">Verification Method</label>
+              <div class="input-wrap"><svg class="ic"><use href="#i-shield-check"/></svg>
+                <select id="f-method" name="method">
+                  <option value="dns-01" selected>DNS-01 — TXT record (recommended)</option>
+                  <option value="http-01">HTTP-01 — Well-known file</option>
+                </select>
+              </div>
+            </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" id="issue-btn">
-                <svg class="ic ic-sm"><use href="#i-key"/></svg> Generate Certificate
+                <svg class="ic ic-sm"><use href="#i-key"/></svg> Request Certificate
               </button>
               <button type="reset" class="btn btn-ghost">
                 <svg class="ic ic-sm"><use href="#i-refresh"/></svg> Reset
@@ -599,7 +554,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
             <div class="result-empty">
               <div class="ring"><svg class="ic ic-xl"><use href="#i-shield"/></svg></div>
               <h3>Awaiting Request</h3>
-              <p>Your issued certificate, serial number and SHA-256 fingerprint will appear here.</p>
+              <p>Submit the form to receive a domain verification challenge. Your certificate appears here once the challenge passes.</p>
             </div>
           </aside>
         </div>
@@ -616,29 +571,15 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         </div>
 
         <div class="root-ca-card glass reveal">
-          <div class="root-ca-icon">
-            <svg class="ic ic-xl"><use href="#i-shield-check"/></svg>
-          </div>
+          <div class="root-ca-icon"><svg class="ic ic-xl"><use href="#i-shield-check"/></svg></div>
           <div class="root-ca-info">
             <h3>Let-S Secure Root CA</h3>
             <p>X.509 v3 self-signed certificate · ready to install on any platform</p>
             <div class="root-ca-meta">
-              <div class="rc-meta-item">
-                <span class="rc-key">Algorithm</span>
-                <span class="rc-val">RSA-4096 / SHA-256</span>
-              </div>
-              <div class="rc-meta-item">
-                <span class="rc-key">Format</span>
-                <span class="rc-val">PEM (.pem / .crt)</span>
-              </div>
-              <div class="rc-meta-item">
-                <span class="rc-key">Validity</span>
-                <span class="rc-val">10 years</span>
-              </div>
-              <div class="rc-meta-item">
-                <span class="rc-key">Type</span>
-                <span class="rc-val">Private CA</span>
-              </div>
+              <div class="rc-meta-item"><span class="rc-key">Algorithm</span><span class="rc-val">RSA-4096 / SHA-256</span></div>
+              <div class="rc-meta-item"><span class="rc-key">Format</span><span class="rc-val">PEM (.pem / .crt)</span></div>
+              <div class="rc-meta-item"><span class="rc-key">Validity</span><span class="rc-val">10 years</span></div>
+              <div class="rc-meta-item"><span class="rc-key">Type</span><span class="rc-val">Private CA</span></div>
             </div>
           </div>
           <div class="root-ca-actions">
@@ -654,30 +595,12 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         <div class="glass root-ca-install-hint reveal">
           <h4>📱 How to install the Root CA</h4>
           <div class="install-steps-grid">
-            <div class="install-step-card">
-              <strong>Android</strong>
-              <p>Settings → Security → Encryption &amp; credentials → Install a certificate → CA certificate</p>
-            </div>
-            <div class="install-step-card">
-              <strong>iOS / iPadOS</strong>
-              <p>Download via Safari → Settings → Profile Downloaded → Install → Enable Full Trust in Certificate Trust Settings</p>
-            </div>
-            <div class="install-step-card">
-              <strong>Windows</strong>
-              <p>Double-click the file → Install Certificate → Local Machine → Trusted Root Certification Authorities</p>
-            </div>
-            <div class="install-step-card">
-              <strong>macOS</strong>
-              <p>Open in Keychain Access → System → drag file → set to "Always Trust"</p>
-            </div>
-            <div class="install-step-card">
-              <strong>Linux (Debian / Ubuntu)</strong>
-              <p>sudo cp root-ca.pem /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</p>
-            </div>
-            <div class="install-step-card">
-              <strong>Nginx / Apache Server</strong>
-              <p>cat leaf.pem root-ca.pem &gt; bundle.crt, then point ssl_certificate to bundle.crt</p>
-            </div>
+            <div class="install-step-card"><strong>Android</strong><p>Settings → Security → Encryption &amp; credentials → Install a certificate → CA certificate</p></div>
+            <div class="install-step-card"><strong>iOS / iPadOS</strong><p>Download via Safari → Settings → Profile Downloaded → Install → Enable Full Trust in Certificate Trust Settings</p></div>
+            <div class="install-step-card"><strong>Windows</strong><p>Double-click the file → Install Certificate → Local Machine → Trusted Root Certification Authorities</p></div>
+            <div class="install-step-card"><strong>macOS</strong><p>Open in Keychain Access → System → drag file → set to "Always Trust"</p></div>
+            <div class="install-step-card"><strong>Linux (Debian / Ubuntu)</strong><p>sudo cp root-ca.pem /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</p></div>
+            <div class="install-step-card"><strong>Nginx / Apache</strong><p>cat leaf.pem root-ca.pem &gt; bundle.crt, then point ssl_certificate to bundle.crt</p></div>
           </div>
         </div>
       </section>
@@ -689,33 +612,33 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         <div class="section-head reveal">
           <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-lock"/></svg> Platform Capabilities</span>
           <h2>Everything a Private CA Should Do</h2>
-          <p>A complete certificate lifecycle — from key generation to revocation — built for modern development teams.</p>
+          <p>A complete certificate lifecycle with mandatory domain ownership verification.</p>
         </div>
         <div class="features-grid grid-stagger">
           <article class="glass feature reveal">
+            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></div>
+            <h3>Domain Verification</h3>
+            <p>DNS-01 and HTTP-01 challenges ensure only the true domain owner can obtain a certificate.</p>
+          </article>
+          <article class="glass feature reveal">
             <div class="f-icon"><svg class="ic ic-lg"><use href="#i-cert"/></svg></div>
             <h3>Certificate Generation</h3>
-            <p>Issue X.509 v3 certificates signed by the Let-S Secure private root in milliseconds.</p>
+            <p>X.509 v3 certificates signed by the Let-S Secure private root in milliseconds.</p>
           </article>
           <article class="glass feature reveal">
             <div class="f-icon"><svg class="ic ic-lg"><use href="#i-key"/></svg></div>
             <h3>Digital Signature</h3>
-            <p>SHA-256 with RSA-2048 signing guarantees integrity and authentic origin for every cert.</p>
+            <p>SHA-256 with RSA-2048 signing guarantees integrity and authentic origin.</p>
           </article>
           <article class="glass feature reveal">
             <div class="f-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>
             <h3>Certificate Verification</h3>
-            <p>Validate any certificate instantly by ID or domain against the trusted certificate store.</p>
+            <p>Validate any certificate instantly by ID or domain against the trusted store.</p>
           </article>
           <article class="glass feature reveal">
             <div class="f-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>
             <h3>Certificate Revocation</h3>
             <p>Revoke compromised certificates immediately and publish the change to the CRL.</p>
-          </article>
-          <article class="glass feature reveal">
-            <div class="f-icon"><svg class="ic ic-lg"><use href="#i-lock"/></svg></div>
-            <h3>HTTPS Ready</h3>
-            <p>Drop-in PEM bundles compatible with Nginx, Apache, Traefik, Caddy and Node.js servers.</p>
           </article>
         </div>
       </section>
@@ -760,8 +683,8 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         <div id="status-result"></div>
       </div>
       <div class="container" style="padding:0;max-width:820px;margin-top:44px">
-        <h3 style="font-size:1.05rem;margin-bottom:6px">Issued Certificates</h3>
-        <p style="color:var(--muted);font-size:.85rem">All certificates stored on the server.</p>
+        <h3 style="font-size:1.05rem;margin-bottom:6px">Recent Certificates</h3>
+        <p style="color:var(--muted);font-size:.85rem">Recent certificates issued from this browser.</p>
         <div class="cert-list" id="status-list"></div>
       </div>
     </div>
@@ -798,7 +721,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         <p>Manage your private CA — create Root CA, list certificates, revoke or delete them, and view audit logs.</p>
       </div>
 
-      <!-- Login form -->
       <div class="glass admin-card reveal" id="admin-login-card">
         <h3>Admin Login</h3>
         <p class="sub">Sign in with your administrator credentials.</p>
@@ -816,7 +738,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         </div>
       </div>
 
-      <!-- Admin dashboard -->
       <div id="admin-dashboard" style="display:none">
         <div class="glass tool-card reveal" style="max-width:100%;margin-top:0">
           <div class="admin-header">
@@ -826,17 +747,13 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
             </div>
             <span class="admin-badge"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg> Authenticated</span>
           </div>
-
           <div class="form-actions" style="margin-top:0;margin-bottom:20px">
             <button class="btn btn-primary btn-sm" id="admin-create-root-btn"><svg class="ic ic-sm"><use href="#i-key"/></svg> Create Root CA</button>
             <button class="btn btn-ghost btn-sm" id="admin-load-certs-btn"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> Reload Certificates</button>
             <button class="btn btn-ghost btn-sm" id="admin-load-logs-btn"><svg class="ic ic-sm"><use href="#i-clock"/></svg> View Audit Logs</button>
           </div>
-
           <div id="admin-message"></div>
-
           <div class="cert-list" id="admin-cert-list"></div>
-
           <div id="admin-logs-container" style="margin-top:26px"></div>
         </div>
       </div>
@@ -861,7 +778,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
-      <a data-goto="home" data-anchor="#request">Generate Certificate</a>
+      <a data-goto="home" data-anchor="#request">Request Certificate</a>
       <a data-goto="home" data-anchor="#trust-root">Download Root CA</a>
       <a data-goto="home" data-anchor="#features">Features</a>
       <a data-page="admin">Admin Panel</a>
@@ -873,7 +790,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   </div>
 </footer>
 
-<!-- ===================== TOASTS ===================== -->
 <div class="toast-wrap" id="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
 <script>
@@ -881,22 +797,20 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   "use strict";
 
   /* ==========================================================
-     CONFIG — YOUR RENDER BACKEND
+     CONFIG
      ========================================================== */
   const API_BASE = "https://lets-secure-ca.onrender.com";
 
   const API = {
-    root:        `${API_BASE}/`,
-    health:      `${API_BASE}/healthz`,
-    requestCert: `${API_BASE}/api/request-cert`,
-    verifyCert:  `${API_BASE}/api/verify-cert`,
-    status:      (id) => `${API_BASE}/api/status/${encodeURIComponent(id)}`,
-    download:    (id) => `${API_BASE}/api/cert/${encodeURIComponent(id)}`,
-    downloadJson:(id) => `${API_BASE}/api/cert/${encodeURIComponent(id)}/json`,
-    rootCaPem:   `${API_BASE}/api/root-ca.pem`,
-    adminLogin:  `${API_BASE}/api/admin/login`,
+    requestCert:  `${API_BASE}/api/request-cert`,
+    challenge:    (id) => `${API_BASE}/api/challenge/${encodeURIComponent(id)}`,
+    verifyChallenge: (id) => `${API_BASE}/api/verify-challenge/${encodeURIComponent(id)}`,
+    verifyCert:   `${API_BASE}/api/verify-cert`,
+    status:       (id) => `${API_BASE}/api/status/${encodeURIComponent(id)}`,
+    download:     (id) => `${API_BASE}/api/cert/${encodeURIComponent(id)}`,
+    rootCaPem:    `${API_BASE}/api/root-ca.pem`,
+    adminLogin:   `${API_BASE}/api/admin/login`,
     adminCreateRoot: `${API_BASE}/api/admin/create-root-ca`,
-    adminRootInfo:   `${API_BASE}/api/admin/root-ca`,
     adminListCerts:  `${API_BASE}/api/admin/certificates`,
     adminRevoke:     `${API_BASE}/api/admin/revoke-cert`,
     adminDelete: (id) => `${API_BASE}/api/admin/certificate/${encodeURIComponent(id)}`,
@@ -904,7 +818,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   };
 
   /* ==========================================================
-     UTILITIES
+     UTILS
      ========================================================== */
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -927,6 +841,14 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  function fmtCountdown(ms) {
+    if (ms <= 0) return "expired";
+    const totalSec = Math.floor(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
   /* ==========================================================
      API CLIENT
      ========================================================== */
@@ -935,13 +857,11 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
       ...options
     });
-
     let data = null;
     const text = await res.text();
     if (text) {
       try { data = JSON.parse(text); } catch { data = { raw: text }; }
     }
-
     if (!res.ok) {
       const message = (data && (data.error || data.detail || data.message)) || `HTTP ${res.status}`;
       const err = new Error(message);
@@ -953,23 +873,15 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   const getToken = () => localStorage.getItem("ls_admin_token") || "";
-
-  async function apiAuth(url, options = {}) {
-    return apiRequest(url, {
-      ...options,
-      headers: { ...(options.headers || {}), Authorization: `Bearer ${getToken()}` }
-    });
-  }
+  const apiAuth = (url, options = {}) =>
+    apiRequest(url, { ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${getToken()}` } });
 
   const api = {
-    requestCert: (payload) =>
-      apiRequest(API.requestCert, { method: "POST", body: JSON.stringify(payload) }),
-
-    verifyCert: (payload) =>
-      apiRequest(API.verifyCert, { method: "POST", body: JSON.stringify(payload) }),
-
+    requestCert: (payload) => apiRequest(API.requestCert, { method: "POST", body: JSON.stringify(payload) }),
+    getChallenge: (id) => apiRequest(API.challenge(id)),
+    verifyChallenge: (id) => apiRequest(API.verifyChallenge(id), { method: "POST" }),
+    verifyCert: (payload) => apiRequest(API.verifyCert, { method: "POST", body: JSON.stringify(payload) }),
     status: (id) => apiRequest(API.status(id)),
-
     downloadPem: async (id) => {
       const res = await fetch(API.download(id));
       if (!res.ok) {
@@ -979,15 +891,10 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       }
       return res.text();
     },
-
-    adminLogin: (email, password) =>
-      apiRequest(API.adminLogin, { method: "POST", body: JSON.stringify({ email, password }) }),
-
+    adminLogin: (email, password) => apiRequest(API.adminLogin, { method: "POST", body: JSON.stringify({ email, password }) }),
     adminCreateRoot: () => apiAuth(API.adminCreateRoot, { method: "POST" }),
-    adminRootInfo: () => apiAuth(API.adminRootInfo),
     adminListCerts: () => apiAuth(API.adminListCerts),
-    adminRevoke: (certId, reason) =>
-      apiAuth(API.adminRevoke, { method: "POST", body: JSON.stringify({ certId, reason }) }),
+    adminRevoke: (certId, reason) => apiAuth(API.adminRevoke, { method: "POST", body: JSON.stringify({ certId, reason }) }),
     adminDelete: (id) => apiAuth(API.adminDelete(id), { method: "DELETE" }),
     adminAuditLogs: () => apiAuth(API.adminAuditLogs),
   };
@@ -1029,19 +936,16 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 
   function render(page) {
     if (!PAGES.includes(page)) page = "home";
-
     PAGES.forEach((p) => {
       const el = document.getElementById("page-" + p);
       if (el) el.classList.toggle("active", p === page);
     });
-
     $$(".nav-link").forEach((a) => a.classList.toggle("active", a.dataset.page === page));
 
     const navLinks = $("#nav-links");
     const menuBtn = $("#menu-btn");
     if (navLinks) navLinks.classList.remove("open");
     if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
-
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     if (pendingAnchor) {
@@ -1090,7 +994,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     NAVIGATION
+     DELEGATED NAVIGATION
      ========================================================== */
   document.addEventListener("click", (e) => {
     const gotoEl = e.target.closest("[data-goto]");
@@ -1159,6 +1063,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   const DOMAIN_RE = /^(?!-)(?:[a-zA-Z0-9\u00a1-\uffff](?:[a-zA-Z0-9\u00a1-\uffff-]{0,61}[a-zA-Z0-9\u00a1-\uffff])?\.)+[a-zA-Z\u00a1-\uffff]{2,}$/;
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const CERT_ID_RE = /^LS-[A-Fa-f0-9]{8}$/;
+  const CHALLENGE_ID_RE = /^CH-[A-Fa-f0-9]{12}$/;
 
   function setFieldError(name, hasError) {
     const field = document.querySelector('[data-field="' + name + '"]');
@@ -1169,44 +1074,143 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     ISSUE CERTIFICATE
+     CERTIFICATE REQUEST + CHALLENGE FLOW
      ========================================================== */
   const form = $("#cert-form");
   const resultBox = $("#issue-result");
 
-  const ISSUE_STEPS = [
-    "Validating request",
-    "Generating RSA-2048 key pair",
-    "Building X.509 v3 extensions",
-    "Signing with private CA key",
-    "Publishing to certificate store"
-  ];
+  // Current challenge state
+  let currentChallenge = null;
+  let challengeTimerInterval = null;
 
-  function renderIssuing() {
-    const stepsHtml = ISSUE_STEPS.map((label, i) => (
-      '<div class="step" data-step="' + i + '">' +
-        '<span class="dot">' + (i + 1) + "</span>" +
-        "<span>" + label + "</span>" +
-      "</div>"
-    )).join("");
-    resultBox.innerHTML = '<div class="issuing"><h3>Issuing Certificate…</h3>' + stepsHtml + "</div>";
+  function clearChallengeTimer() {
+    if (challengeTimerInterval) {
+      clearInterval(challengeTimerInterval);
+      challengeTimerInterval = null;
+    }
   }
 
-  async function animateSteps() {
-    for (let i = 0; i < ISSUE_STEPS.length; i++) {
-      const el = resultBox.querySelector('[data-step="' + i + '"]');
-      if (!el) continue;
-      el.classList.add("active");
-      el.querySelector(".dot").innerHTML = '<span class="spinner"></span>';
-      await sleep(380);
-      el.classList.remove("active");
-      el.classList.add("done");
-      el.querySelector(".dot").innerHTML = "✓";
-    }
-    await sleep(200);
+  function renderInitial() {
+    clearChallengeTimer();
+    currentChallenge = null;
+    resultBox.innerHTML =
+      '<div class="result-empty">' +
+        '<div class="ring"><svg class="ic ic-xl"><use href="#i-shield"/></svg></div>' +
+        "<h3>Awaiting Request</h3>" +
+        "<p>Submit the form to receive a domain verification challenge. Your certificate appears here once the challenge passes.</p>" +
+      "</div>";
+  }
+
+  function renderIssuingChallenge() {
+    resultBox.innerHTML =
+      '<div class="issuing">' +
+        "<h3>Creating Challenge…</h3>" +
+        '<div class="step active"><span class="dot"><span class="spinner"></span></span><span>Validating request</span></div>' +
+        '<div class="step"><span class="dot">2</span><span>Generating verification token</span></div>' +
+        '<div class="step"><span class="dot">3</span><span>Waiting for domain ownership proof</span></div>' +
+      "</div>";
+  }
+
+  function renderChallenge(challenge) {
+    currentChallenge = challenge;
+
+    const isDns = challenge.method === "dns-01";
+
+    const recordRows = isDns
+      ? (
+          '<div class="record-table">' +
+            '<div class="record-row"><span class="k">Type</span><span class="v">TXT</span></div>' +
+            '<div class="record-row"><span class="k">Name</span><span class="v">' + escapeHtml(challenge.dns.name) + "</span></div>" +
+            '<div class="record-row"><span class="k">Value</span><span class="v">' + escapeHtml(challenge.dns.value) + "</span></div>" +
+            '<div class="record-row"><span class="k">TTL</span><span class="v">300</span></div>' +
+          "</div>"
+        )
+      : (
+          '<div class="record-table">' +
+            '<div class="record-row"><span class="k">File Path</span><span class="v">' + escapeHtml(challenge.http.path) + "</span></div>" +
+            '<div class="record-row"><span class="k">Content</span><span class="v">' + escapeHtml(challenge.http.content) + "</span></div>" +
+          "</div>" +
+          '<div class="challenge-instruction">' +
+            '<div class="label">Accessible URL</div>' +
+            '<div class="value">' + escapeHtml(challenge.http.url) + "</div>" +
+          "</div>"
+        );
+
+    const providerHint = isDns
+      ? 'Log into your DNS provider (Cloudflare, Namecheap, GoDaddy, etc.), add the TXT record above, then click <b>Verify Now</b>.'
+      : 'Create the file above on your web server, then click <b>Verify Now</b>.';
+
+    resultBox.innerHTML =
+      '<div class="challenge-panel">' +
+        '<div class="c-head">' +
+          '<div class="c-icon"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></div>' +
+          "<div>" +
+            "<h3>Domain Verification Required</h3>" +
+            "<p>Prove ownership of <b>" + escapeHtml(challenge.domain) + "</b> using " +
+              (isDns ? "a DNS TXT record" : "an HTTP well-known file") + ".</p>" +
+          "</div>" +
+        "</div>" +
+
+        recordRows +
+
+        '<div class="challenge-instruction" style="margin-bottom:14px">' +
+          '<div class="label">Challenge ID</div>' +
+          '<div class="value">' + escapeHtml(challenge.id) + "</div>" +
+        "</div>" +
+
+        '<div class="challenge-timer">' +
+          "<span>Challenge expires in</span> <b id=\"ch-timer\">--:--</b>" +
+        "</div>" +
+
+        '<div class="challenge-hint">' + providerHint + "</div>" +
+
+        (challenge.lastError
+          ? '<div class="challenge-error"><strong>Last attempt failed</strong>' + escapeHtml(challenge.lastError) + "</div>"
+          : "") +
+
+        '<div class="form-actions" style="margin-top:6px">' +
+          '<button class="btn btn-primary" data-action="verify-challenge" data-id="' + challenge.id + '">' +
+            '<svg class="ic ic-sm"><use href="#i-check-circle"/></svg> Verify Now' +
+          "</button>" +
+          (isDns
+            ? '<button class="btn btn-ghost btn-sm" data-action="copy-dns-name" data-id="' + challenge.id + '">' +
+                '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Record Name' +
+              "</button>" +
+              '<button class="btn btn-ghost btn-sm" data-action="copy-dns-value" data-id="' + challenge.id + '">' +
+                '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Value' +
+              "</button>"
+            : '<button class="btn btn-ghost btn-sm" data-action="copy-http-content" data-id="' + challenge.id + '">' +
+                '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Content' +
+              "</button>") +
+          '<button class="btn btn-ghost btn-sm" data-action="cancel-challenge">' +
+            '<svg class="ic ic-sm"><use href="#i-x-circle"/></svg> Cancel' +
+          "</button>" +
+        "</div>" +
+      "</div>";
+
+    startChallengeTimer(challenge.expiresAt);
+  }
+
+  function startChallengeTimer(expiresAt) {
+    clearChallengeTimer();
+    const timerEl = document.getElementById("ch-timer");
+    if (!timerEl) return;
+    const update = () => {
+      const remaining = new Date(expiresAt).getTime() - Date.now();
+      timerEl.textContent = fmtCountdown(remaining);
+      if (remaining <= 0) {
+        clearChallengeTimer();
+        toast("Challenge expired. Please request a new certificate.", "err");
+      }
+    };
+    update();
+    challengeTimerInterval = setInterval(update, 1000);
   }
 
   function renderIssued(cert) {
+    clearChallengeTimer();
+    currentChallenge = null;
+
     resultBox.innerHTML =
       '<div class="issued-head">' +
         '<div class="ok-ring"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
@@ -1231,6 +1235,21 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       "</div>";
   }
 
+  function renderChallengeFailed(err, challenge) {
+    if (!challenge) {
+      resultBox.innerHTML =
+        '<div class="verify-banner bad">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
+          "<div><h3>Request Failed</h3><p>" + escapeHtml(err.message || "Unknown error") + "</p></div>" +
+        "</div>" +
+        '<button class="btn btn-ghost btn-sm" data-action="reset-flow" style="margin-top:16px"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> Try Again</button>';
+      return;
+    }
+
+    // Refresh the challenge panel with the error
+    renderChallenge({ ...challenge, lastError: err.message });
+  }
+
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1242,7 +1261,8 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         project: String(fd.get("project") || "").trim(),
         domain: String(fd.get("domain") || "").trim().toLowerCase()
           .replace(/^https?:\/\//, "").replace(/\/.*$/, ""),
-        email: String(fd.get("email") || "").trim()
+        email: String(fd.get("email") || "").trim(),
+        method: String(fd.get("method") || "dns-01")
       };
 
       let valid = true;
@@ -1261,26 +1281,16 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       const btn = $("#issue-btn");
       if (btn) btn.disabled = true;
 
-      renderIssuing();
+      renderIssuingChallenge();
 
       try {
-        const apiPromise = api.requestCert(data);
-        await animateSteps();
-        const res = await apiPromise;
-        const cert = res.certificate;
-
-        cacheCertId(cert.certId);
-        renderIssued(cert);
-        toast("Certificate " + cert.certId + " issued successfully.", "ok");
+        const res = await api.requestCert(data);
+        // res = { valid, status: "challenge_pending", challenge: {...} }
+        renderChallenge(res.challenge);
+        toast("Challenge created. Complete the verification to get your certificate.", "info", 5000);
       } catch (err) {
-        console.error(err);
-        resultBox.innerHTML =
-          '<div class="verify-banner bad">' +
-            '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
-            "<div><h3>Issuance Failed</h3><p>" + escapeHtml(err.message || "The CA server could not issue the certificate.") + "</p></div>" +
-          "</div>" +
-          '<button class="btn btn-ghost btn-sm" data-action="retry-issue" style="margin-top:16px"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> Try Again</button>';
-        toast("Issuance failed: " + (err.message || "unknown error"), "err", 5000);
+        renderChallengeFailed(err, null);
+        toast("Request failed: " + (err.message || "unknown error"), "err", 5000);
       } finally {
         if (btn) btn.disabled = false;
       }
@@ -1288,17 +1298,12 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 
     form.addEventListener("reset", () => {
       clearErrors();
-      resultBox.innerHTML =
-        '<div class="result-empty">' +
-          '<div class="ring"><svg class="ic ic-xl"><use href="#i-shield"/></svg></div>' +
-          "<h3>Awaiting Request</h3>" +
-          "<p>Your issued certificate, serial number and SHA-256 fingerprint will appear here.</p>" +
-        "</div>";
+      renderInitial();
     });
   }
 
   /* ==========================================================
-     GLOBAL ACTION DELEGATION
+     CHALLENGE ACTIONS
      ========================================================== */
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-action]");
@@ -1306,6 +1311,54 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
+    /* ---- Verify challenge ---- */
+    if (action === "verify-challenge") {
+      btn.disabled = true;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Checking…';
+
+      try {
+        const res = await api.verifyChallenge(id);
+        // res = { valid: true, status: "issued", certificate: {...} }
+        const cert = res.certificate;
+        cacheCertId(cert.certId);
+        renderIssued(cert);
+        toast("Domain verified. Certificate " + cert.certId + " issued.", "ok", 5000);
+      } catch (err) {
+        // Refresh challenge state from server if available
+        let refreshed = null;
+        try { refreshed = await api.getChallenge(id); refreshed = refreshed.challenge; } catch {}
+        renderChallengeFailed(err, refreshed);
+        toast("Verification failed: " + (err.message || "unknown error").split("\n")[0], "err", 6000);
+      }
+    }
+
+    /* ---- Copy helpers ---- */
+    if (action === "copy-dns-name" && currentChallenge) {
+      const ok = await copyText(currentChallenge.dns.name);
+      toast(ok ? "DNS record name copied." : "Copy failed.", ok ? "ok" : "err");
+    }
+    if (action === "copy-dns-value" && currentChallenge) {
+      const ok = await copyText(currentChallenge.dns.value);
+      toast(ok ? "DNS record value copied." : "Copy failed.", ok ? "ok" : "err");
+    }
+    if (action === "copy-http-content" && currentChallenge) {
+      const ok = await copyText(currentChallenge.http.content);
+      toast(ok ? "File content copied." : "Copy failed.", ok ? "ok" : "err");
+    }
+
+    /* ---- Cancel challenge ---- */
+    if (action === "cancel-challenge") {
+      if (!confirm("Cancel this challenge? You'll need to start over.")) return;
+      renderInitial();
+      toast("Challenge cancelled.", "info");
+    }
+
+    if (action === "reset-flow") {
+      renderInitial();
+    }
+
+    /* ---- Existing actions (from issued card) ---- */
     if (action === "download-now") {
       try {
         const pem = await api.downloadPem(id);
@@ -1315,21 +1368,22 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         toast("Download failed: " + err.message, "err");
       }
     }
-
     if (action === "copy-id") {
       const ok = await copyText(id);
       toast(ok ? "Certificate ID copied." : "Copy failed.", ok ? "ok" : "err");
     }
-
     if (action === "prefill-verify") {
       const vi = $("#verify-input");
       if (vi) vi.value = id;
     }
-
-    if (action === "retry-issue") {
-      form.dispatchEvent(new Event("submit", { cancelable: true }));
+    if (action === "prefill-status") {
+      const i = $("#status-input"); if (i) i.value = id;
+    }
+    if (action === "prefill-download") {
+      const i = $("#download-input"); if (i) i.value = id;
     }
 
+    /* ---- Admin actions ---- */
     if (action === "admin-revoke") {
       const certId = btn.dataset.id;
       if (!confirm("Revoke certificate " + certId + "? This cannot be undone.")) return;
@@ -1343,7 +1397,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         btn.disabled = false;
       }
     }
-
     if (action === "admin-delete") {
       const certId = btn.dataset.id;
       if (!confirm("Delete certificate " + certId + " permanently?")) return;
@@ -1357,7 +1410,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
         btn.disabled = false;
       }
     }
-
     if (action === "admin-view-status") {
       const si = $("#status-input");
       if (si) si.value = id;
@@ -1365,6 +1417,9 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     }
   });
 
+  /* ==========================================================
+     HELPERS
+     ========================================================== */
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(text).then(() => true).catch(() => fallbackCopy(text));
@@ -1558,17 +1613,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     });
   }
 
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-action]");
-    if (!btn) return;
-    if (btn.dataset.action === "prefill-status") {
-      const i = $("#status-input"); if (i) i.value = btn.dataset.id;
-    }
-    if (btn.dataset.action === "prefill-download") {
-      const i = $("#download-input"); if (i) i.value = btn.dataset.id;
-    }
-  });
-
   /* ==========================================================
      STATUS PAGE
      ========================================================== */
@@ -1589,8 +1633,8 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 
     const timeline =
       '<div class="timeline">' +
-        '<div class="tl-item"><span class="tl-dot"><svg class="ic ic-sm"><use href="#i-cert"/></svg></span>' +
-          "<div><strong>Request Received</strong><span>" + escapeHtml(fmtDate(cert.issuedAt)) + "</span></div></div>" +
+        '<div class="tl-item"><span class="tl-dot"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg></span>' +
+          "<div><strong>Domain Verified</strong><span>Ownership proven via challenge</span></div></div>" +
         '<div class="tl-item"><span class="tl-dot"><svg class="ic ic-sm"><use href="#i-key"/></svg></span>' +
           "<div><strong>Certificate Issued</strong><span>" + escapeHtml(fmtDate(cert.issuedAt)) + "</span></div></div>" +
         '<div class="tl-item ' + (revoked ? "revoked" : "") + '"><span class="tl-dot"><svg class="ic ic-sm"><use href="#' +
