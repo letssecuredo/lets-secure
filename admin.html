@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Download Certificate — Let-S Secure</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z' fill='none' stroke='%2338bdf8' stroke-width='1.7'/></svg>" />
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body data-page="download">
+
+<div class="bg" aria-hidden="true">
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" aria-label="Toggle menu" aria-expanded="false">
+      <svg class="ic"><use href="#i-menu"/></svg>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="verify.html">Verify</a>
+      <a class="nav-link" href="status.html">Status</a>
+      <a class="nav-link active" href="download.html">Download</a>
+      <a class="nav-link" href="admin.html">Admin</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-head">
+      <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-download"/></svg> Export</span>
+      <h1>Download Certificate</h1>
+      <p>Export your signed certificate as PEM or CRT, ready for your web server.</p>
+    </div>
+
+    <div class="glass tool-card reveal">
+      <div class="search-row">
+        <div class="input-wrap">
+          <svg class="ic"><use href="#i-cert"/></svg>
+          <input type="text" id="download-input" placeholder="Enter Certificate ID (LS-XXXXXXXX)" />
+        </div>
+        <button class="btn btn-primary" id="download-btn">
+          <svg class="ic ic-sm"><use href="#i-download"/></svg> Load
+        </button>
+      </div>
+      <div id="download-result"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b> Private CA</span>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="index.html">Home</a>
+      <a href="verify.html">Verify Certificate</a>
+      <a href="status.html">Certificate Status</a>
+      <a href="download.html">Download Certificate</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="index.html#request">Request Certificate</a>
+      <a href="index.html#trust-root">Download Root CA</a>
+      <a href="index.html#features">Features</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year"></span> Let-S Secure Private CA — All rights reserved.</span>
+    <span>Powered by <b>Render</b> and <b>GitHub Pages</b></span>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+window.LS_download = function () {
+  "use strict";
+  const { $, escapeHtml, fmtDate, toast, apiRequest, CERT_ID_RE,
+    renderAdvancedError, downloadFile, copyText } = LS;
+  const API = LS.API;
+
+  const input = $("#download-input");
+  const btn = $("#download-btn");
+  const out = $("#download-result");
+
+  let loadedCert = null;
+  let loadedPem = "";
+
+  async function fetchPem(id) {
+    const res = await fetch(API.download(id));
+    if (!res.ok) {
+      let msg = "Certificate not found";
+      try { const j = await res.json(); msg = j.error || msg; } catch {}
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+    return res.text();
+  }
+
+  async function load() {
+    const q = (input.value || "").trim().toUpperCase();
+    if (!q) {
+      out.innerHTML =
+        '<div class="verify-result"><div class="verify-banner warn">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-info"/></svg></div>' +
+          "<div><h3>Input Required</h3><p>Enter a certificate ID to load the bundle.</p></div>" +
+        "</div></div>";
+      toast("Enter a certificate ID.", "err");
+      return;
+    }
+    if (!CERT_ID_RE.test(q)) {
+      out.innerHTML =
+        '<div class="advanced-error">' +
+          '<div class="ae-head">' +
+            '<div class="ae-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
+            '<div><h4>Invalid certificate ID<span class="ae-code">BAD_FORMAT</span></h4>' +
+            "<p>Expected format: LS-XXXXXXXX</p></div>" +
+          "</div>" +
+          '<div class="ae-message">"' + escapeHtml(q) + '" is not a valid certificate ID.</div>' +
+        "</div>";
+      return;
+    }
+
+    btn.disabled = true;
+    out.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
+      '<div class="vb-icon"><span class="spinner"></span></div>' +
+      "<div><h3>Loading…</h3><p>Fetching PEM bundle from CA</p></div></div></div>";
+
+    try {
+      const [statusRes, pem] = await Promise.all([
+        apiRequest(API.status(q)).catch(() => null),
+        fetchPem(q).catch(() => ""),
+      ]);
+      const cert = statusRes ? statusRes.certificate : { certId: q, domain: q, project: "—", expiresAt: null };
+      loadedCert = cert;
+      loadedPem = pem;
+      renderDownload(cert, pem);
+    } catch (err) {
+      renderAdvancedError(out, err, {
+        retryAction: load,
+        retryLabel: "Retry",
+      });
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderDownload(cert, pem) {
+    out.innerHTML =
+      '<div class="verify-result">' +
+        '<div class="verify-banner ok">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
+          "<div><h3>" + escapeHtml(cert.domain || cert.certId) + "</h3>" +
+          "<p>" + escapeHtml(cert.certId) + " · " + escapeHtml(cert.project || "—") +
+          (cert.expiresAt ? " · expires " + escapeHtml(fmtDate(cert.expiresAt)) : "") + "</p></div>" +
+        "</div>" +
+        (pem
+          ? '<div class="pem-box">' +
+              '<div class="pem-head"><span>certificate.pem</span><span>PEM · Base64</span></div>' +
+              '<div class="pem-body">' + escapeHtml(pem) + "</div>" +
+            "</div>"
+          : '<div class="status-banner"><div class="sb-icon"><svg class="ic ic-sm"><use href="#i-info"/></svg></div>' +
+            "<p>The PEM bundle was not available. Click Download again to retry.</p></div>") +
+        '<div class="form-actions" style="margin-top:22px">' +
+          '<button class="btn btn-primary btn-sm" data-dl="pem"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .pem</button>' +
+          '<button class="btn btn-ghost btn-sm" data-dl="crt"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .crt</button>' +
+          '<button class="btn btn-ghost btn-sm" data-dl="copy"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy PEM</button>' +
+        "</div>" +
+      "</div>";
+  }
+
+  btn.addEventListener("click", load);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); load(); }
+  });
+
+  out.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-dl]");
+    if (!b || !loadedCert) return;
+    const kind = b.dataset.dl;
+
+    if (!loadedPem) {
+      try { loadedPem = await fetchPem(loadedCert.certId); }
+      catch (err) {
+        renderAdvancedError(out, err, { retryAction: load, retryLabel: "Retry Load" });
+        return;
+      }
+    }
+
+    if (kind === "pem") {
+      downloadFile(loadedCert.certId + ".pem", loadedPem);
+      toast("Downloaded " + loadedCert.certId + ".pem", "ok");
+    } else if (kind === "crt") {
+      downloadFile(loadedCert.certId + ".crt", loadedPem, "application/x-x509-ca-cert");
+      toast("Downloaded " + loadedCert.certId + ".crt", "ok");
+    } else if (kind === "copy") {
+      const ok = await copyText(loadedPem);
+      toast(ok ? "PEM copied to clipboard." : "Copy failed.", ok ? "ok" : "err");
+    }
+  });
+
+  const params = new URLSearchParams(location.search);
+  if (params.get("id")) {
+    input.value = params.get("id").toUpperCase();
+    load();
+  } else {
+    const ids = LS.getCachedCertIds();
+    if (ids[0]) input.placeholder = "Try: " + ids[0];
+  }
+};
+</script>
+</body>
+</html>
