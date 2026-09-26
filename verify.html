@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verify Certificate — Let-S Secure</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z' fill='none' stroke='%2338bdf8' stroke-width='1.7'/></svg>" />
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body data-page="verify">
+
+<div class="bg" aria-hidden="true">
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" aria-label="Toggle menu" aria-expanded="false">
+      <svg class="ic"><use href="#i-menu"/></svg>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link active" href="verify.html">Verify</a>
+      <a class="nav-link" href="status.html">Status</a>
+      <a class="nav-link" href="download.html">Download</a>
+      <a class="nav-link" href="admin.html">Admin</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-head">
+      <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-search"/></svg> Verification</span>
+      <h1>Verify Certificate</h1>
+      <p>Enter a certificate ID or domain name to validate its signature, chain of trust and current status.</p>
+    </div>
+
+    <div class="glass tool-card reveal">
+      <div class="search-row">
+        <div class="input-wrap">
+          <svg class="ic"><use href="#i-shield-check"/></svg>
+          <input type="text" id="verify-input" placeholder="LS-XXXXXXXX or api.example.com" aria-label="Certificate ID or domain" />
+        </div>
+        <button class="btn btn-primary" id="verify-btn">
+          <svg class="ic ic-sm"><use href="#i-check-circle"/></svg> Verify
+        </button>
+      </div>
+      <div id="verify-result"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b> Private CA</span>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="index.html">Home</a>
+      <a href="verify.html">Verify Certificate</a>
+      <a href="status.html">Certificate Status</a>
+      <a href="download.html">Download Certificate</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="index.html#request">Request Certificate</a>
+      <a href="index.html#trust-root">Download Root CA</a>
+      <a href="index.html#features">Features</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year"></span> Let-S Secure Private CA — All rights reserved.</span>
+    <span>Powered by <b>Render</b> and <b>GitHub Pages</b></span>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+window.LS_verify = function () {
+  "use strict";
+  const { $, escapeHtml, fmtDate, toast, apiRequest, DOMAIN_RE, CERT_ID_RE,
+    renderAdvancedError } = LS;
+  const API = LS.API;
+
+  const input = $("#verify-input");
+  const btn = $("#verify-btn");
+  const out = $("#verify-result");
+
+  function certDataRows(cert) {
+    return (
+      '<div class="data-list">' +
+        '<div class="data-row"><span class="k">Certificate ID</span><span class="v">' + escapeHtml(cert.certId) + "</span></div>" +
+        '<div class="data-row"><span class="k">Common Name</span><span class="v">' + escapeHtml(cert.domain) + "</span></div>" +
+        '<div class="data-row"><span class="k">Organization</span><span class="v">' + escapeHtml(cert.project || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Owner</span><span class="v">' + escapeHtml(cert.owner || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Email</span><span class="v">' + escapeHtml(cert.email || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Serial Number</span><span class="v">' + escapeHtml(cert.serialNumber || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Issued</span><span class="v">' + escapeHtml(fmtDate(cert.issuedAt)) + "</span></div>" +
+        '<div class="data-row"><span class="k">Expires</span><span class="v">' + escapeHtml(fmtDate(cert.expiresAt)) + "</span></div>" +
+        '<div class="data-row"><span class="k">Status</span><span class="v">' + escapeHtml(cert.status || "—") + "</span></div>" +
+      "</div>" +
+      (cert.fingerprint
+        ? '<div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 8px">SHA-256 Fingerprint</div>' +
+          '<div class="mono" style="font-size:.71rem;color:#7fa8d4;word-break:break-all;line-height:1.7">' + escapeHtml(cert.fingerprint) + "</div>"
+        : "")
+    );
+  }
+
+  async function doVerify() {
+    const q = (input.value || "").trim();
+    if (!q) {
+      out.innerHTML =
+        '<div class="verify-result"><div class="verify-banner warn">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-info"/></svg></div>' +
+          "<div><h3>Input Required</h3><p>Enter a certificate ID or domain name.</p></div>" +
+        "</div></div>";
+      toast("Enter a certificate ID or domain.", "err");
+      return;
+    }
+
+    btn.disabled = true;
+    out.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
+      '<div class="vb-icon"><span class="spinner"></span></div>' +
+      "<div><h3>Verifying…</h3><p>Contacting Let-S Secure CA</p></div></div></div>";
+
+    try {
+      let result, cert;
+
+      if (CERT_ID_RE.test(q)) {
+        result = await apiRequest(API.verifyCert(), {
+          method: "POST",
+          body: JSON.stringify({ certId: q.toUpperCase() }),
+        });
+        try {
+          const sr = await apiRequest(API.status(q.toUpperCase()));
+          cert = sr.certificate;
+        } catch {}
+      } else if (DOMAIN_RE.test(q)) {
+        const sr = await apiRequest(`${LS.API_BASE}/api/certificates/domain/${encodeURIComponent(q.toLowerCase())}`);
+        cert = sr.certificate;
+        result = {
+          valid: cert.status === "active",
+          reason: cert.status === "active" ? "" : "Certificate " + cert.status,
+        };
+      } else {
+        throw new Error("Enter a valid LS-XXXXXXXX ID or domain name");
+      }
+
+      const expired = cert && cert.expiresAt && Date.now() > new Date(cert.expiresAt).getTime();
+      const revoked = cert && cert.status === "revoked";
+
+      let cls = "ok", icon = "i-check-circle", title = "Certificate is Valid";
+      let msg = "Signature verified · Chain of trust intact · Issued by Let-S Secure Private CA";
+
+      if (revoked) {
+        cls = "bad"; icon = "i-x-circle"; title = "Certificate Revoked";
+        msg = "This certificate was revoked on " + fmtDate(cert.revokedAt) + " and must not be trusted.";
+      } else if (expired) {
+        cls = "warn"; icon = "i-clock"; title = "Certificate Expired";
+        msg = "This certificate expired on " + fmtDate(cert.expiresAt) + ".";
+      } else if (result && result.valid === false) {
+        cls = "bad"; icon = "i-x-circle"; title = "Certificate Invalid";
+        msg = result.reason || "The certificate failed verification.";
+      }
+
+      out.innerHTML =
+        '<div class="verify-result">' +
+          '<div class="verify-banner ' + cls + '">' +
+            '<div class="vb-icon"><svg class="ic ic-lg"><use href="#' + icon + '"/></svg></div>' +
+            "<div><h3>" + title + "</h3><p>" + escapeHtml(msg) + "</p></div>" +
+          "</div>" +
+          (cert ? certDataRows(cert) : "") +
+          (cert
+            ? '<div class="form-actions">' +
+                '<a class="btn btn-ghost btn-sm" href="status.html?id=' + encodeURIComponent(cert.certId) + '"><svg class="ic ic-sm"><use href="#i-clock"/></svg> View Status</a>' +
+                '<a class="btn btn-ghost btn-sm" href="download.html?id=' + encodeURIComponent(cert.certId) + '"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download</a>' +
+              "</div>"
+            : "") +
+        "</div>";
+
+      toast(result && result.valid ? "Certificate verified." : "Certificate is not valid.",
+        result && result.valid ? "ok" : "err");
+    } catch (err) {
+      renderAdvancedError(out, err, {
+        retryAction: doVerify,
+        retryLabel: "Retry Verification",
+      });
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener("click", doVerify);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); doVerify(); }
+  });
+
+  // Prefill from query
+  const params = new URLSearchParams(location.search);
+  if (params.get("id")) input.value = params.get("id").toUpperCase();
+  else {
+    const ids = LS.getCachedCertIds();
+    if (ids[0]) input.placeholder = "Try: " + ids[0];
+  }
+};
+</script>
+</body>
+</html>
