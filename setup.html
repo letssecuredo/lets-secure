@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setup Guide — Let-S Secure</title>
+<meta name="description" content="Step-by-step DNS and server setup guide for Let-S Secure certificate issuance." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z' fill='none' stroke='%2338bdf8' stroke-width='1.7'/></svg>" />
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+/* ============================================================
+   SETUP PAGE — SPECIFIC STYLES
+   ============================================================ */
+
+/* Method tabs */
+.setup-tabs{
+  display:flex;gap:6px;justify-content:center;flex-wrap:wrap;
+  margin:28px auto 32px;padding:6px;border-radius:16px;
+  background:rgba(17,24,39,.6);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid var(--line);
+  width:fit-content;max-width:100%;
+}
+.setup-tab{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 20px;border-radius:11px;
+  font-size:.88rem;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:.25s var(--ease);white-space:nowrap;
+  border:1px solid transparent;
+}
+.setup-tab:hover{color:#fff;background:rgba(255,255,255,.05)}
+.setup-tab.active{
+  color:#fff;background:linear-gradient(120deg,var(--primary),var(--secondary));
+  border-color:rgba(255,255,255,.1);
+  box-shadow:0 10px 26px -12px rgba(31,111,235,.9);
+}
+.setup-tab .ic{width:16px;height:16px}
+
+/* Method panel */
+.method-panel{display:none;animation:pageIn .5s var(--ease) both}
+.method-panel.active{display:block}
+
+/* Intro block */
+.setup-intro{
+  padding:22px;border-radius:18px;margin-bottom:32px;
+  background:linear-gradient(140deg,rgba(56,189,248,.09),rgba(31,111,235,.05));
+  border:1px solid rgba(56,189,248,.28);
+  display:flex;gap:16px;align-items:flex-start;
+}
+.setup-intro .si-icon{
+  width:48px;height:48px;border-radius:14px;flex:none;
+  display:grid;place-items:center;
+  background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.4);
+  color:var(--accent);
+}
+.setup-intro h3{font-size:1rem;margin-bottom:6px}
+.setup-intro p{font-size:.85rem;color:#a9b6cd;line-height:1.65;margin:0}
+.setup-intro code{
+  padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.4);
+  font-size:.78rem;color:var(--accent);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+/* Provider card */
+.provider-grid{
+  display:grid;gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+}
+.provider-card{
+  padding:0;overflow:hidden;
+  transition:transform .35s var(--ease),border-color .35s,box-shadow .35s;
+}
+.provider-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(56,189,248,.4);
+  box-shadow:0 26px 56px -26px rgba(56,189,248,.75);
+}
+.provider-head{
+  display:flex;align-items:center;gap:14px;
+  padding:20px 22px;
+  border-bottom:1px solid var(--line);
+  background:rgba(8,12,24,.5);
+}
+.provider-logo{
+  width:46px;height:46px;border-radius:13px;flex:none;
+  display:grid;place-items:center;
+  font-weight:800;font-size:1.05rem;
+  color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
+}
+.provider-logo.cf{background:linear-gradient(135deg,#f6821f,#faae40)}
+.provider-logo.nc{background:linear-gradient(135deg,#de3723,#ff6b4a)}
+.provider-logo.gd{background:linear-gradient(135deg,#1bdbdb,#00a4a6)}
+.provider-logo.hs{background:linear-gradient(135deg,#673de6,#8e5cff)}
+.provider-logo.fd{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.provider-logo.gc{background:linear-gradient(135deg,#4285f4,#34a853)}
+.provider-logo.aws{background:linear-gradient(135deg,#ff9900,#e47911)}
+.provider-logo.do{background:linear-gradient(135deg,#0080ff,#0069d9)}
+.provider-logo.cp{background:linear-gradient(135deg,#ff6c2c,#e05515)}
+.provider-logo.nx{background:linear-gradient(135deg,#009639,#006b28)}
+.provider-logo.ap{background:linear-gradient(135deg,#d22128,#a01920)}
+.provider-logo.cd{background:linear-gradient(135deg,#22b638,#1a8d2c)}
+
+.provider-head h3{font-size:1rem;margin:0 0 2px}
+.provider-head p{font-size:.74rem;color:var(--muted);margin:0}
+
+.provider-body{padding:20px 22px}
+
+/* Step list */
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+.step-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:12px 14px;border-radius:12px;
+  background:rgba(8,12,24,.45);
+  border:1px solid rgba(255,255,255,.05);
+  transition:border-color .25s;
+}
+.step-item:hover{border-color:rgba(56,189,248,.25)}
+.step-num{
+  width:26px;height:26px;border-radius:50%;flex:none;
+  display:grid;place-items:center;
+  font-size:.76rem;font-weight:800;
+  background:rgba(56,189,248,.13);
+  border:1px solid rgba(56,189,248,.4);
+  color:var(--accent);
+}
+.step-item .step-content{flex:1;min-width:0}
+.step-item strong{display:block;font-size:.86rem;margin-bottom:3px;color:#fff}
+.step-item p{font-size:.79rem;color:var(--muted);line-height:1.6;margin:0}
+.step-item code{
+  padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.45);
+  font-size:.74rem;color:var(--accent);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  word-break:break-all;
+}
+
+/* Copy row */
+.copy-row{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:11px;
+  background:rgba(8,12,24,.72);
+  border:1px solid rgba(56,189,248,.28);
+  margin-top:14px;
+}
+.copy-row .copy-label{
+  font-size:.68rem;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+  flex:none;
+}
+.copy-row .copy-value{
+  flex:1;min-width:0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78rem;color:#8fb7e0;
+  word-break:break-all;
+}
+.copy-row .copy-btn{
+  padding:6px 12px;border-radius:8px;flex:none;
+  background:rgba(56,189,248,.14);
+  border:1px solid rgba(56,189,248,.4);
+  color:var(--accent);font-size:.74rem;font-weight:700;
+  cursor:pointer;transition:.2s;white-space:nowrap;
+}
+.copy-row .copy-btn:hover{background:rgba(56,189,248,.24)}
+.copy-row .copy-btn:active{transform:scale(.96)}
+
+/* ============================================================
+   UI MOCKUP (fake screenshots)
+   ============================================================ */
+.ui-mock{
+  margin-top:16px;
+  border-radius:14px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);
+  background:#0a0f1e;
+  box-shadow:0 20px 46px -24px rgba(0,0,0,.85);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:.78rem;
+}
+.ui-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 12px;
+  background:rgba(255,255,255,.03);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.7rem;color:var(--muted);
+}
+.ui-dots{display:flex;gap:4px}
+.ui-dot{width:8px;height:8px;border-radius:50%}
+.ui-dot.r{background:#ff5f57}
+.ui-dot.y{background:#ffbd2e}
+.ui-dot.g{background:#28ca41}
+.ui-url{
+  margin-left:8px;padding:3px 10px;border-radius:6px;
+  background:rgba(0,0,0,.4);color:#94a3b8;
+  font-size:.7rem;
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.ui-body{padding:14px}
+.ui-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-bottom:12px;flex-wrap:wrap;
+}
+.ui-toolbar .ui-title{font-size:.8rem;font-weight:700;color:#fff}
+.ui-add-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:8px;
+  background:linear-gradient(120deg,var(--primary),var(--secondary));
+  color:#fff;font-size:.72rem;font-weight:700;
+}
+.ui-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.ui-table th{
+  text-align:left;padding:8px 10px;
+  font-size:.64rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.ui-table td{
+  padding:9px 10px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  color:#cbd5e1;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.7rem;
+}
+.ui-table td.type{color:var(--accent);font-weight:700}
+.ui-table td.hl{
+  color:#fff;
+  background:rgba(56,189,248,.1);
+  border-left:2px solid var(--accent);
+  border-right:2px solid var(--accent);
+  position:relative;
+}
+.ui-table tr.hl-row{
+  position:relative;
+  animation:pulseRow 2s ease-in-out infinite;
+}
+.ui-table tr.hl-row td:first-child{border-left:2px solid var(--accent);border-radius:6px 0 0 6px}
+.ui-table tr.hl-row td:last-child{border-right:2px solid var(--accent);border-radius:0 6px 6px 0}
+@keyframes pulseRow{
+  0%,100%{background:rgba(56,189,248,.06)}
+  50%{background:rgba(56,189,248,.14)}
+}
+
+.ui-form{
+  display:grid;gap:10px;
+  padding:14px;
+  border-radius:10px;
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.06);
+}
+.ui-form-row{display:grid;gap:5px}
+.ui-form-row label{
+  font-size:.66rem;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);
+}
+.ui-form-row .ui-input{
+  padding:8px 11px;border-radius:8px;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.1);
+  color:#e2e8f0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.72rem;
+  word-break:break-all;
+}
+.ui-form-row .ui-input.hl{
+  border-color:var(--accent);
+  background:rgba(56,189,248,.08);
+  color:#fff;
+  box-shadow:0 0 0 3px rgba(56,189,248,.14);
+  position:relative;
+}
+.ui-form-row .ui-select{
+  padding:8px 11px;border-radius:8px;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.1);
+  color:#e2e8f0;
+  font-size:.72rem;
+}
+.ui-form-row .ui-select.hl{
+  border-color:var(--accent);
+  background:rgba(56,189,248,.08);
+  box-shadow:0 0 0 3px rgba(56,189,248,.14);
+}
+.ui-save{
+  padding:9px 16px;border-radius:8px;
+  background:linear-gradient(120deg,var(--primary),var(--secondary));
+  color:#fff;font-size:.75rem;font-weight:700;
+  text-align:center;
+  margin-top:6px;
+}
+.ui-note{
+  padding:9px 12px;border-radius:8px;
+  background:rgba(245,158,11,.09);
+  border:1px solid rgba(245,158,11,.3);
+  color:#fcd34d;font-size:.7rem;
+  margin-top:10px;line-height:1.5;
+}
+
+/* Arrow pointer to highlight */
+.ui-arrow{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:999px;
+  font-size:.68rem;font-weight:700;
+  background:rgba(56,189,248,.14);
+  color:var(--accent);
+  border:1px solid rgba(56,189,248,.4);
+  margin:8px 0;
+}
+
+/* Terminal mock */
+.term{
+  padding:14px 16px;border-radius:12px;
+  background:#050810;
+  border:1px solid rgba(255,255,255,.1);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74rem;line-height:1.75;
+  color:#8fb7e0;
+  overflow-x:auto;
+  margin-top:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+.term .c{color:#64748b}
+.term .cmd{color:#4ade80}
+.term .out{color:#cbd5e1}
+.term .hl{color:#fcd34d}
+.term-head{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px;margin:-14px -16px 10px;
+  background:rgba(255,255,255,.03);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:.68rem;color:var(--muted);
+  letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+}
+
+/* Troubleshoot */
+.trouble-grid{
+  display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  margin-top:22px;
+}
+.trouble-card{
+  padding:18px;border-radius:14px;
+  background:rgba(8,12,24,.6);
+  border:1px solid rgba(255,255,255,.06);
+  transition:border-color .25s;
+}
+.trouble-card:hover{border-color:rgba(239,68,68,.35)}
+.trouble-card h4{
+  font-size:.88rem;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;color:#fff;
+}
+.trouble-card h4 .ic{color:#fca5a5;width:16px;height:16px}
+.trouble-card p{font-size:.79rem;color:var(--muted);line-height:1.6;margin:0}
+.trouble-card code{
+  padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.4);
+  font-size:.74rem;color:#fca5a5;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+/* Section headers */
+.setup-section{margin:60px 0}
+.setup-section-head{
+  display:flex;align-items:center;gap:12px;margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.setup-section-head .num-badge{
+  width:36px;height:36px;border-radius:11px;flex:none;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff;font-weight:800;font-size:.9rem;
+  box-shadow:0 8px 22px -8px rgba(31,111,235,.9);
+}
+.setup-section-head h2{font-size:1.35rem;margin:0}
+.setup-section-head p{
+  width:100%;font-size:.85rem;color:var(--muted);margin:4px 0 0;
+}
+
+/* Responsive */
+@media (max-width:640px){
+  .setup-tabs{padding:5px;border-radius:14px;width:100%}
+  .setup-tab{padding:10px 12px;font-size:.78rem;flex:1;justify-content:center}
+  .setup-tab .ic{width:14px;height:14px}
+  .provider-head{padding:16px}
+  .provider-logo{width:40px;height:40px;border-radius:11px}
+  .provider-body{padding:16px}
+  .ui-table{font-size:.66rem}
+  .ui-table td{padding:7px 8px;font-size:.66rem}
+  .copy-row{flex-direction:column;align-items:stretch;gap:8px}
+  .copy-row .copy-btn{width:100%;text-align:center}
+}
+</style>
+</head>
+<body data-page="setup">
+
+<div class="bg" aria-hidden="true">
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" aria-label="Toggle menu" aria-expanded="false">
+      <svg class="ic"><use href="#i-menu"/></svg>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="verify.html">Verify</a>
+      <a class="nav-link" href="status.html">Status</a>
+      <a class="nav-link" href="download.html">Download</a>
+      <a class="nav-link active" href="setup.html">Setup</a>
+      <a class="nav-link" href="admin.html">Admin</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-head">
+      <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg> Setup Guide</span>
+      <h1>Domain Verification Setup</h1>
+      <p>Step-by-step visual instructions for setting up DNS records on every major hosting provider.</p>
+    </div>
+
+    <!-- METHOD TABS -->
+    <div class="setup-tabs" role="tablist">
+      <button class="setup-tab active" data-method="dns" role="tab">
+        <svg class="ic ic-sm"><use href="#i-globe"/></svg> DNS-01
+      </button>
+      <button class="setup-tab" data-method="http" role="tab">
+        <svg class="ic ic-sm"><use href="#i-globe"/></svg> HTTP-01
+      </button>
+      <button class="setup-tab" data-method="tls" role="tab">
+        <svg class="ic ic-sm"><use href="#i-lock"/></svg> TLS-ALPN-01
+      </button>
+    </div>
+
+    <!-- ============================================================
+         METHOD: DNS-01
+         ============================================================ -->
+    <div class="method-panel active" data-panel="dns">
+
+      <div class="setup-intro">
+        <div class="si-icon"><svg class="ic ic-lg"><use href="#i-globe"/></svg></div>
+        <div>
+          <h3>How DNS-01 verification works</h3>
+          <p>
+            When you request a certificate, our server gives you a random token. You add that token as a
+            <code>TXT</code> record under <code>_letssecure-challenge.yourdomain.com</code>. Our server
+            then queries your DNS. If the token matches, the certificate is issued.
+          </p>
+        </div>
+      </div>
+
+      <!-- STEP 1: GET VALUES -->
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">1</span>
+          <h2>Get your TXT record values</h2>
+          <p>Request a certificate from the Home page. You'll get a Name and Value — keep them handy. They look like this:</p>
+        </div>
+
+        <div class="glass" style="padding:20px">
+          <div class="copy-row">
+            <span class="copy-label">Type</span>
+            <span class="copy-value" style="color:#6ee7a8">TXT</span>
+          </div>
+          <div class="copy-row">
+            <span class="copy-label">Name</span>
+            <span class="copy-value" id="sample-name">_letssecure-challenge.example.com</span>
+            <button class="copy-btn" data-copy="#sample-name">Copy</button>
+          </div>
+          <div class="copy-row">
+            <span class="copy-label">Value</span>
+            <span class="copy-value" id="sample-value">ls-verify-a3f8b2c9d4e5f6a7b8c9d0e1f2a3b4c5</span>
+            <button class="copy-btn" data-copy="#sample-value">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: PROVIDERS -->
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">2</span>
+          <h2>Add the record in your DNS provider</h2>
+          <p>Pick your hosting provider below. Each card shows exactly where to click and what to type.</p>
+        </div>
+
+        <div class="provider-grid">
+
+          <!-- ========== CLOUDFLARE ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo cf">CF</div>
+              <div>
+                <h3>Cloudflare</h3>
+                <p>Recommended · Fastest propagation</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Cloudflare dashboard</strong>
+                    <p>Go to <code>dash.cloudflare.com</code> → select your domain.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Go to DNS → Records</strong>
+                    <p>Left sidebar → <code>DNS</code> → <code>Records</code>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Click "Add record"</strong>
+                    <p>Fill the form exactly as shown:</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">dash.cloudflare.com/…/dns/records</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records</span>
+                    <span class="ui-add-btn">+ Add record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl">
+                        <option>TXT</option>
+                      </select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Content</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9d4e5f6…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select">
+                        <option>Auto</option>
+                      </select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                💡 <b>Tip:</b> Cloudflare typically propagates within <b>1–5 minutes</b>.
+                Do <b>not</b> enable the proxy (orange cloud) for this record — leave it as DNS-only.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== NAMECHEAP ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo nc">NC</div>
+              <div>
+                <h3>Namecheap</h3>
+                <p>Popular registrar · 15–30 min propagation</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Namecheap Dashboard</strong>
+                    <p>Go to <code>namecheap.com</code> → <b>Domain List</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "Manage" next to your domain</strong>
+                    <p>Then go to the <b>Advanced DNS</b> tab.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add New Record</strong>
+                    <p>Select <b>TXT Record</b> from the dropdown.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">ap.www.namecheap.com/Domains/DomainControlPanel</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Advanced DNS</span>
+                    <span class="ui-add-btn">+ Add New Record</span>
+                  </div>
+                  <table class="ui-table">
+                    <thead>
+                      <tr><th>Type</th><th>Host</th><th>Value</th><th>TTL</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="type">A</td>
+                        <td>@</td>
+                        <td>192.0.2.1</td>
+                        <td>Auto</td>
+                      </tr>
+                      <tr class="hl-row">
+                        <td class="type hl">TXT</td>
+                        <td class="hl">_letssecure-challenge</td>
+                        <td class="hl">ls-verify-a3f8…</td>
+                        <td class="hl">Automatic</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                ⚠️ In the <b>Host</b> field, enter <b>only</b> <code>_letssecure-challenge</code> —
+                Namecheap appends your domain automatically.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== GODADDY ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo gd">GD</div>
+              <div>
+                <h3>GoDaddy</h3>
+                <p>Popular registrar · 30–60 min propagation</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open GoDaddy</strong>
+                    <p>Go to <code>godaddy.com</code> → <b>My Products</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "DNS" next to your domain</strong>
+                    <p>Then click <b>Add</b> under DNS Records.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Choose TXT type</strong>
+                    <p>Enter the values exactly as shown below.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">dcc.godaddy.com/manage/dns</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records</span>
+                    <span class="ui-add-btn">+ Add</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9d4e5f6…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>1/2 Hour</option></select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                ⚠️ GoDaddy's DNS panel is slow. If propagation takes &gt;1 hour, try
+                <b>flushing your resolver cache</b> or querying a public resolver like <code>1.1.1.1</code>.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== HOSTINGER ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo hs">HG</div>
+              <div>
+                <h3>Hostinger</h3>
+                <p>Popular cPanel-free hosting</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open hPanel</strong>
+                    <p>Go to <code>hpanel.hostinger.com</code> → <b>Domains</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "DNS / Nameservers"</strong>
+                    <p>Then choose <b>Manage DNS records</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add a new record</strong>
+                    <p>Type <b>TXT</b>, paste Name and Value.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">hpanel.hostinger.com/domain/dns</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <table class="ui-table">
+                    <thead>
+                      <tr><th>Type</th><th>Name</th><th>Content</th><th>TTL</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="type">A</td>
+                        <td>@</td>
+                        <td>192.0.2.1</td>
+                        <td>14400</td>
+                      </tr>
+                      <tr class="hl-row">
+                        <td class="type hl">TXT</td>
+                        <td class="hl">_letssecure-challenge</td>
+                        <td class="hl">ls-verify-a3f8…</td>
+                        <td class="hl">300</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== FREEDNS ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo fd">FD</div>
+              <div>
+                <h3>FreeDNS (afraid.org)</h3>
+                <p>Free subdomains like .xo.je</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Log in to FreeDNS</strong>
+                    <p>Go to <code>freedns.afraid.org</code> → <b>Subdomains</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Find your subdomain</strong>
+                    <p>Example: <code>melodyfmusic.xo.je</code>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Click "Add" to add a new record</strong>
+                    <p>Choose Type: <b>TXT</b>. Paste Name &amp; Value.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">freedns.afraid.org/subdomain/</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">melodyfmusic.xo.je</span>
+                    <span class="ui-add-btn">+ Add</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Subdomain</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Destination</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>300</option></select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                ⚠️ <b>FreeDNS limitation:</b> Some free subdomains do not support TXT records.
+                If you can't add it, use <b>HTTP-01</b> instead or move the domain to Cloudflare.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== GOOGLE CLOUD DNS ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo gc">GC</div>
+              <div>
+                <h3>Google Cloud DNS</h3>
+                <p>For domains managed on GCP</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Cloud Console</strong>
+                    <p><code>console.cloud.google.com/net-services/dns</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Select your zone → "Add record set"</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Resource Record Type: TXT</strong>
+                    <p>Paste Name and Value.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">console.cloud.google.com/net-services/dns/zones</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Record sets</span>
+                    <span class="ui-add-btn">+ Add record set</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>DNS name</label>
+                      <div class="ui-input hl">_letssecure-challenge.example.com.</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Resource Record Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL (seconds)</label>
+                      <div class="ui-input">300</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>RDATA</label>
+                      <div class="ui-input hl">"ls-verify-a3f8b2c9d4e5…"</div>
+                    </div>
+                    <div class="ui-save">Create</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                💡 Google DNS requires the RDATA value to be wrapped in <b>double quotes</b>.
+                Include them exactly.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== AWS ROUTE 53 ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo aws">53</div>
+              <div>
+                <h3>AWS Route 53</h3>
+                <p>Enterprise-grade DNS</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Route 53 Console</strong>
+                    <p><code>console.aws.amazon.com/route53</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Hosted zones → click your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>"Create record" → Type TXT</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">console.aws.amazon.com/route53/v2/hostedzones</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Record name</span>
+                    <span class="ui-add-btn">+ Create record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Record name</label>
+                      <div class="ui-input hl">_letssecure-challenge.example.com</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Record type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">"ls-verify-a3f8b2c9d4e5…"</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <div class="ui-input">300</div>
+                    </div>
+                    <div class="ui-save">Create records</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== DIGITALOCEAN ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo do">DO</div>
+              <div>
+                <h3>DigitalOcean</h3>
+                <p>Simple and developer-friendly</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Log in to DigitalOcean</strong>
+                    <p><code>cloud.digitalocean.com/networking/domains</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click your domain → "Add Record"</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Type TXT → Paste values</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">cloud.digitalocean.com/networking/domains/example.com</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Create new record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Hostname</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <div class="ui-input">300</div>
+                    </div>
+                    <div class="ui-save">Create record</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== cPanel ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo cp">cP</div>
+              <div>
+                <h3>cPanel (shared hosting)</h3>
+                <p>Works for most shared hosts</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Log in to cPanel</strong>
+                    <p>Click <b>Zone Editor</b> under the Domains section.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "Manage" next to your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Click "+ Add Record"</strong>
+                    <p>Select Type: <b>TXT</b>. Paste Name and Value.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">your-host.com:2083/cpsess…/zone-editor</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Zone Editor — example.com</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <table class="ui-table">
+                    <thead>
+                      <tr><th>Name</th><th>TTL</th><th>Type</th><th>Record</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>example.com.</td>
+                        <td>14400</td>
+                        <td class="type">A</td>
+                        <td>192.0.2.1</td>
+                      </tr>
+                      <tr class="hl-row">
+                        <td class="hl">_letssecure-challenge.example.com.</td>
+                        <td class="hl">300</td>
+                        <td class="type hl">TXT</td>
+                        <td class="hl">ls-verify-a3f8…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                💡 cPanel requires a <b>trailing dot</b> at the end of the record name.
+                Example: <code>_letssecure-challenge.example.com.</code>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STEP 3: VERIFY -->
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">3</span>
+          <h2>Verify from your terminal</h2>
+          <p>Before clicking Verify Now in the app, confirm your DNS record is publicly visible.</p>
+        </div>
+
+        <div class="glass" style="padding:22px">
+          <div class="term">
+            <div class="term-head">Terminal</div>
+            <span class="c"># Query the authoritative resolver</span><br>
+            <span class="cmd">$</span> <span class="out">nslookup -type=TXT _letssecure-challenge.example.com 1.1.1.1</span><br><br>
+            <span class="c"># Expected output:</span><br>
+            <span class="out">Server:     1.1.1.1</span><br>
+            <span class="out">Address:    1.1.1.1#53</span><br><br>
+            <span class="out">Non-authoritative answer:</span><br>
+            <span class="hl">_letssecure-challenge.example.com  text = "ls-verify-a3f8b2c9d4e5…"</span><br><br>
+            <span class="c"># Or with dig:</span><br>
+            <span class="cmd">$</span> <span class="out">dig TXT _letssecure-challenge.example.com +short</span>
+          </div>
+
+          <div class="ui-note" style="margin-top:16px">
+            💡 If you see the token, click <b>Verify Now</b> in the Home page.
+            If you don't, wait 5–30 minutes and try again.
+          </div>
+        </div>
+      </div>
+
+      <!-- TROUBLESHOOTING -->
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">?</span>
+          <h2>Common issues</h2>
+        </div>
+        <div class="trouble-grid">
+          <div class="trouble-card">
+            <h4><svg class="ic"><use href="#i-x-circle"/></svg> "No TXT record found"</h4>
+            <p>Either the record isn't saved, or DNS hasn't propagated yet. Wait 15–30 min and re-verify with <code>nslookup</code>.</p>
+          </div>
+          <div class="trouble-card">
+            <h4><svg class="ic"><use href="#i-x-circle"/></svg> "Token mismatch"</h4>
+            <p>The record exists but has the wrong value. Copy the token exactly, with no spaces or line breaks.</p>
+          </div>
+          <div class="trouble-card">
+            <h4><svg class="ic"><use href="#i-x-circle"/></svg> Record has quotes</h4>
+            <p>Some providers auto-add quotes. Our server strips them — no action needed.</p>
+          </div>
+          <div class="trouble-card">
+            <h4><svg class="ic"><use href="#i-x-circle"/></svg> Propagation is slow</h4>
+            <p>Some ISPs cache DNS for hours. Try <code>nslookup … 1.1.1.1</code> to query Cloudflare directly.</p>
+          </div>
+          <div class="trouble-card">
+            <h4><svg class="ic"><use href="#i-x-circle"/></svg> FreeDNS won't allow TXT</h4>
+            <p>Switch to HTTP-01 method, or move the domain to Cloudflare (free) which fully supports TXT.</p>
+          </div>
+          <div class="trouble-card">
+            <h4><svg class="ic"><use href="#i-x-circle"/></svg> Wildcard domain requested</h4>
+            <p>Wildcards (<code>*.example.com</code>) require DNS-01. HTTP-01 and TLS-ALPN-01 don't support them.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         METHOD: HTTP-01
+         ============================================================ -->
+    <div class="method-panel" data-panel="http">
+
+      <div class="setup-intro">
+        <div class="si-icon"><svg class="ic ic-lg"><use href="#i-globe"/></svg></div>
+        <div>
+          <h3>How HTTP-01 verification works</h3>
+          <p>
+            Our server requests a specific file from your web server at
+            <code>http://yourdomain.com/.well-known/letssecure-challenge/&lt;token&gt;</code>.
+            If the file exists and its content matches, the certificate is issued.
+          </p>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">1</span>
+          <h2>Get the file path and content</h2>
+          <p>Request a certificate from the Home page and select <b>HTTP-01</b> as the method.</p>
+        </div>
+
+        <div class="glass" style="padding:20px">
+          <div class="copy-row">
+            <span class="copy-label">Path</span>
+            <span class="copy-value" id="http-path">/.well-known/letssecure-challenge/a3f8b2c9d4e5f6a7</span>
+            <button class="copy-btn" data-copy="#http-path">Copy</button>
+          </div>
+          <div class="copy-row">
+            <span class="copy-label">Content</span>
+            <span class="copy-value" id="http-content">ls-verify-a3f8b2c9d4e5f6a7b8c9d0e1f2a3b4c5</span>
+            <button class="copy-btn" data-copy="#http-content">Copy</button>
+          </div>
+          <div class="copy-row">
+            <span class="copy-label">URL</span>
+            <span class="copy-value" id="http-url">http://example.com/.well-known/letssecure-challenge/…</span>
+            <button class="copy-btn" data-copy="#http-url">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">2</span>
+          <h2>Create the file on your web server</h2>
+          <p>Choose your server type below for exact instructions.</p>
+        </div>
+
+        <div class="provider-grid">
+
+          <!-- NGINX -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo nx">NX</div>
+              <div>
+                <h3>Nginx</h3>
+                <p>Most popular web server</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Create the directory</strong>
+                    <p>SSH into your server and run:</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Write the token to a file</strong>
+                    <p>Use <code>tee</code> or <code>echo</code> to write the exact content.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Configure Nginx to serve it</strong>
+                    <p>Add a <code>location</code> block to your site config.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="term">
+                <div class="term-head">Shell</div>
+                <span class="cmd">$</span> <span class="out">sudo mkdir -p /var/www/html/.well-known/letssecure-challenge/</span><br>
+                <span class="cmd">$</span> <span class="out">echo "ls-verify-a3f8b2c9d4e5…" | sudo tee \</span><br>
+                <span class="out">  /var/www/html/.well-known/letssecure-challenge/a3f8b2c9d4e5f6a7</span>
+              </div>
+
+              <div class="term" style="margin-top:10px">
+                <div class="term-head">nginx.conf</div>
+                <span class="c"># Inside your server block:</span><br>
+                <span class="out">location /.well-known/letssecure-challenge/ {</span><br>
+                <span class="out">&nbsp;&nbsp;root /var/www/html;</span><br>
+                <span class="out">&nbsp;&nbsp;default_type text/plain;</span><br>
+                <span class="out">&nbsp;&nbsp;add_header Cache-Control "no-store";</span><br>
+                <span class="out">}</span>
+              </div>
+
+              <div class="term" style="margin-top:10px">
+                <div class="term-head">Reload</div>
+                <span class="cmd">$</span> <span class="out">sudo nginx -t &amp;&amp; sudo systemctl reload nginx</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- APACHE -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo ap">AP</div>
+              <div>
+                <h3>Apache</h3>
+                <p>Classic web server</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Create the file</strong>
+                    <p>Same as Nginx — put it in the DocumentRoot.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Ensure .htaccess allows access</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="term">
+                <div class="term-head">Shell</div>
+                <span class="cmd">$</span> <span class="out">sudo mkdir -p /var/www/html/.well-known/letssecure-challenge/</span><br>
+                <span class="cmd">$</span> <span class="out">echo "ls-verify-a3f8b2c9d4e5…" | sudo tee \</span><br>
+                <span class="out">  /var/www/html/.well-known/letssecure-challenge/a3f8b2c9d4e5f6a7</span><br>
+                <span class="cmd">$</span> <span class="out">sudo chown -R www-data:www-data /var/www/html/.well-known/</span>
+              </div>
+
+              <div class="term" style="margin-top:10px">
+                <div class="term-head">.htaccess</div>
+                <span class="out">&lt;Directory /.well-known/letssecure-challenge/&gt;</span><br>
+                <span class="out">&nbsp;&nbsp;Require all granted</span><br>
+                <span class="out">&nbsp;&nbsp;Options -Indexes</span><br>
+                <span class="out">&lt;/Directory&gt;</span>
+              </div>
+
+              <div class="ui-note">
+                💡 On Debian/Ubuntu, the default DocumentRoot is <code>/var/www/html</code>.
+                Check yours with <code>grep DocumentRoot /etc/apache2/sites-enabled/*</code>.
+              </div>
+            </div>
+          </div>
+
+          <!-- NODE.JS -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo cd">JS</div>
+              <div>
+                <h3>Node.js / Express</h3>
+                <p>For JS-based apps</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Add a static route</strong>
+                    <p>Serve <code>/.well-known/letssecure-challenge/</code> from a folder on disk.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="term">
+                <div class="term-head">server.js</div>
+                <span class="out">const express = require("express");</span><br>
+                <span class="out">const path = require("path");</span><br>
+                <span class="out">const app = express();</span><br><br>
+                <span class="c">// Serve the well-known folder statically</span><br>
+                <span class="out">app.use(</span><br>
+                <span class="out">&nbsp;&nbsp;"/.well-known/letssecure-challenge",</span><br>
+                <span class="out">&nbsp;&nbsp;express.static(path.join(__dirname, "well-known"))</span><br>
+                <span class="out">);</span><br><br>
+                <span class="out">app.listen(80);</span>
+              </div>
+
+              <div class="term" style="margin-top:10px">
+                <div class="term-head">Shell</div>
+                <span class="cmd">$</span> <span class="out">mkdir -p well-known</span><br>
+                <span class="cmd">$</span> <span class="out">echo "ls-verify-a3f8b2c9d4e5…" &gt; \</span><br>
+                <span class="out">  well-known/a3f8b2c9d4e5f6a7</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Caddy -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo cd">CD</div>
+              <div>
+                <h3>Caddy</h3>
+                <p>Modern web server with auto HTTPS</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Place the file in your site root</strong>
+                    <p>Caddy serves static files from the <code>root</code> directive.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Create the file</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="term">
+                <div class="term-head">Shell</div>
+                <span class="cmd">$</span> <span class="out">mkdir -p /var/www/html/.well-known/letssecure-challenge</span><br>
+                <span class="cmd">$</span> <span class="out">echo "ls-verify-a3f8b2c9d4e5…" &gt; \</span><br>
+                <span class="out">  /var/www/html/.well-known/letssecure-challenge/a3f8b2c9d4e5f6a7</span>
+              </div>
+
+              <div class="ui-note">
+                💡 Caddy auto-serves anything in the site's <code>root</code> folder.
+                No extra config needed.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">3</span>
+          <h2>Verify the file is reachable</h2>
+        </div>
+
+        <div class="glass" style="padding:22px">
+          <div class="term">
+            <div class="term-head">Terminal</div>
+            <span class="cmd">$</span> <span class="out">curl -i http://example.com/.well-known/letssecure-challenge/a3f8b2c9d4e5f6a7</span><br><br>
+            <span class="out">HTTP/1.1 200 OK</span><br>
+            <span class="out">Content-Type: text/plain</span><br>
+            <span class="out">…</span><br>
+            <span class="hl">ls-verify-a3f8b2c9d4e5f6a7b8c9d0e1f2a3b4c5</span>
+          </div>
+
+          <div class="ui-note" style="margin-top:14px">
+            ⚠️ The URL <b>must</b> work over plain HTTP (port 80), not HTTPS. Some hosts
+            auto-redirect HTTP→HTTPS — temporarily disable that redirect during verification.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================
+         METHOD: TLS-ALPN-01
+         ============================================================ -->
+    <div class="method-panel" data-panel="tls">
+
+      <div class="setup-intro">
+        <div class="si-icon"><svg class="ic ic-lg"><use href="#i-lock"/></svg></div>
+        <div>
+          <h3>How TLS-ALPN-01 verification works</h3>
+          <p>
+            Our server performs a TLS handshake with your server on port 443 using the
+            <code>acme-tls/1</code> ALPN protocol. Your server must present a specific
+            temporary certificate that contains the challenge token in an
+            <code>acmeIdentifier</code> extension.
+          </p>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">⚠</span>
+          <h2>Before you start</h2>
+        </div>
+
+        <div class="glass" style="padding:20px">
+          <div class="ui-note" style="margin-top:0">
+            <b>TLS-ALPN-01 is advanced.</b> Stock Nginx, Apache, and most shared hosting
+            do <b>NOT</b> support custom ALPN protocols. Only use this method if you're
+            running Caddy, Nginx Plus, or a custom TLS server.
+            <br><br>
+            <b>Alternative:</b> Use DNS-01 or HTTP-01 instead — they work everywhere.
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">1</span>
+          <h2>Download the provisioning files</h2>
+          <p>After requesting a certificate with TLS-ALPN-01, you'll get two files.</p>
+        </div>
+
+        <div class="glass" style="padding:20px">
+          <div class="copy-row">
+            <span class="copy-label">Cert</span>
+            <span class="copy-value">example.com-provision.crt.pem</span>
+            <button class="copy-btn" onclick="alert('Download from the Home page after requesting a certificate.')">Info</button>
+          </div>
+          <div class="copy-row">
+            <span class="copy-label">Key</span>
+            <span class="copy-value">example.com-provision.key.pem</span>
+            <button class="copy-btn" onclick="alert('Download from the Home page after requesting a certificate.')">Info</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">2</span>
+          <h2>Install on your server</h2>
+        </div>
+
+        <div class="provider-grid">
+
+          <!-- CADDY -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo cd">CD</div>
+              <div>
+                <h3>Caddy</h3>
+                <p>Native ALPN support</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <p style="font-size:.83rem;color:var(--muted);line-height:1.6;margin-bottom:12px">
+                Caddy supports ALPN out of the box. Add a dedicated listener on 443.
+              </p>
+
+              <div class="term">
+                <div class="term-head">Caddyfile</div>
+                <span class="out">example.com:443 {</span><br>
+                <span class="out">&nbsp;&nbsp;tls /etc/caddy/provision.crt.pem /etc/caddy/provision.key.pem</span><br>
+                <span class="out">&nbsp;&nbsp;protocols tls1.2 tls1.3</span><br>
+                <span class="out">&nbsp;&nbsp;respond "ok"</span><br>
+                <span class="out">}</span>
+              </div>
+
+              <div class="term" style="margin-top:10px">
+                <div class="term-head">Reload</div>
+                <span class="cmd">$</span> <span class="out">sudo systemctl reload caddy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NGINX PLUS -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo nx">NX+</div>
+              <div>
+                <h3>Nginx Plus</h3>
+                <p>Commercial Nginx — custom ALPN</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <div class="term">
+                <div class="term-head">nginx.conf</div>
+                <span class="out">server {</span><br>
+                <span class="out">&nbsp;&nbsp;listen 443 ssl;</span><br>
+                <span class="out">&nbsp;&nbsp;server_name example.com;</span><br>
+                <span class="out">&nbsp;&nbsp;ssl_certificate     /etc/nginx/provision.crt.pem;</span><br>
+                <span class="out">&nbsp;&nbsp;ssl_certificate_key /etc/nginx/provision.key.pem;</span><br>
+                <span class="out">&nbsp;&nbsp;ssl_alpn "acme-tls/1";</span><br>
+                <span class="out">}</span>
+              </div>
+
+              <div class="ui-note">
+                ⚠️ Stock open-source Nginx does <b>not</b> support <code>ssl_alpn</code> for custom protocols.
+                You need Nginx Plus.
+              </div>
+            </div>
+          </div>
+
+          <!-- CUSTOM -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo do">N</div>
+              <div>
+                <h3>Node.js (custom TLS)</h3>
+                <p>Programmatic control</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <div class="term">
+                <div class="term-head">tls-server.js</div>
+                <span class="out">const tls = require("tls");</span><br>
+                <span class="out">const fs = require("fs");</span><br><br>
+                <span class="out">tls.createServer({</span><br>
+                <span class="out">&nbsp;&nbsp;cert: fs.readFileSync("provision.crt.pem"),</span><br>
+                <span class="out">&nbsp;&nbsp;key: fs.readFileSync("provision.key.pem"),</span><br>
+                <span class="out">&nbsp;&nbsp;ALPNProtocols: ["acme-tls/1"],</span><br>
+                <span class="out">}, (socket) =&gt; socket.end());</span><br>
+                <span class="out">.listen(443);</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-section-head">
+          <span class="num-badge">3</span>
+          <h2>Verify from your terminal</h2>
+        </div>
+
+        <div class="glass" style="padding:22px">
+          <div class="term">
+            <div class="term-head">Terminal</div>
+            <span class="cmd">$</span> <span class="out">openssl s_client -connect example.com:443 \</span><br>
+            <span class="out">  -servername example.com -alpn acme-tls/1 &lt; /dev/null 2&gt;/dev/null | \</span><br>
+            <span class="out">  grep -i "ALPN"</span><br><br>
+            <span class="hl">ALPN protocol: acme-tls/1</span>
+          </div>
+
+          <div class="ui-note" style="margin-top:14px">
+            ✅ If you see <code>ALPN protocol: acme-tls/1</code>, you're ready.
+            Click <b>Verify Now</b> in the Home page.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- HELP BOX -->
+    <div class="glass" style="padding:24px;margin:60px 0 20px">
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+        <div class="si-icon" style="background:rgba(124,58,237,.16);border-color:rgba(124,58,237,.4);color:#c4b5fd">
+          <svg class="ic ic-lg"><use href="#i-info"/></svg>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <h3 style="font-size:1rem;margin-bottom:6px">Need help?</h3>
+          <p style="font-size:.85rem;color:#a9b6cd;line-height:1.65;margin:0 0 12px">
+            If your provider isn't listed, the process is almost always the same:
+            find <b>DNS Records</b>, add a <b>TXT</b> record, paste the Name and Value.
+            If your provider doesn't support TXT, use <b>HTTP-01</b> instead.
+          </p>
+          <div class="form-actions" style="margin-top:0">
+            <a class="btn btn-primary btn-sm" href="index.html#request">
+              <svg class="ic ic-sm"><use href="#i-plus"/></svg> Request Certificate
+            </a>
+            <a class="btn btn-ghost btn-sm" href="status.html">
+              <svg class="ic ic-sm"><use href="#i-clock"/></svg> Check Status
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-shield-check"/></svg></span>
+      <span class="brand-text">Let-S <b>Secure</b> Private CA</span>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="index.html">Home</a>
+      <a href="verify.html">Verify Certificate</a>
+      <a href="status.html">Certificate Status</a>
+      <a href="download.html">Download Certificate</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="setup.html">Setup Guide</a>
+      <a href="index.html#request">Request Certificate</a>
+      <a href="index.html#trust-root">Download Root CA</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year"></span> Let-S Secure Private CA — All rights reserved.</span>
+    <span>Powered by <b>Render</b> and <b>GitHub Pages</b></span>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+window.LS_setup = function () {
+  "use strict";
+  const { $, $$, toast, copyText } = LS;
+
+  /* ==========================================================
+     METHOD TABS
+     ========================================================== */
+  const tabs = $$(".setup-tab");
+  const panels = $$(".method-panel");
+
+  function activate(name) {
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset.method === name));
+    panels.forEach((p) => p.classList.toggle("active", p.dataset.panel === name));
+    // Scroll to top of tabs
+    const tabsEl = $(".setup-tabs");
+    if (tabsEl) {
+      const y = tabsEl.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => activate(tab.dataset.method));
+  });
+
+  /* ==========================================================
+     COPY BUTTONS
+     ========================================================== */
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".copy-btn");
+    if (!btn) return;
+
+    const selector = btn.dataset.copy;
+    if (!selector) return;
+
+    const target = document.querySelector(selector);
+    if (!target) return;
+
+    const text = (target.textContent || "").trim();
+    const ok = await copyText(text);
+    if (ok) {
+      const old = btn.textContent;
+      btn.textContent = "Copied ✓";
+      btn.style.background = "rgba(34,197,94,.2)";
+      btn.style.borderColor = "rgba(34,197,94,.5)";
+      btn.style.color = "#4ade80";
+      setTimeout(() => {
+        btn.textContent = old;
+        btn.style.background = "";
+        btn.style.borderColor = "";
+        btn.style.color = "";
+      }, 1600);
+      toast("Copied to clipboard.", "ok", 1800);
+    } else {
+      toast("Copy failed. Select manually.", "err");
+    }
+  });
+
+  /* ==========================================================
+     AUTO-DETECT PROVIDER FROM URL
+     ========================================================== */
+  const params = new URLSearchParams(location.search);
+  const methodParam = params.get("method");
+  if (methodParam && ["dns", "http", "tls"].includes(methodParam)) {
+    activate(methodParam);
+  }
+};
+</script>
+</body>
+</html>
