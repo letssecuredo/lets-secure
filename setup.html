@@ -11,8 +11,6 @@
 /* ============================================================
    SETUP PAGE — SPECIFIC STYLES
    ============================================================ */
-
-/* Method tabs */
 .setup-tabs{
   display:flex;gap:6px;justify-content:center;flex-wrap:wrap;
   margin:28px auto 32px;padding:6px;border-radius:16px;
@@ -35,12 +33,8 @@
   box-shadow:0 10px 26px -12px rgba(31,111,235,.9);
 }
 .setup-tab .ic{width:16px;height:16px}
-
-/* Method panel */
 .method-panel{display:none;animation:pageIn .5s var(--ease) both}
 .method-panel.active{display:block}
-
-/* Intro block */
 .setup-intro{
   padding:22px;border-radius:18px;margin-bottom:32px;
   background:linear-gradient(140deg,rgba(56,189,248,.09),rgba(31,111,235,.05));
@@ -60,8 +54,6 @@
   font-size:.78rem;color:var(--accent);
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-
-/* Provider card */
 .provider-grid{
   display:grid;gap:20px;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -100,13 +92,9 @@
 .provider-logo.nx{background:linear-gradient(135deg,#009639,#006b28)}
 .provider-logo.ap{background:linear-gradient(135deg,#d22128,#a01920)}
 .provider-logo.cd{background:linear-gradient(135deg,#22b638,#1a8d2c)}
-
 .provider-head h3{font-size:1rem;margin:0 0 2px}
 .provider-head p{font-size:.74rem;color:var(--muted);margin:0}
-
 .provider-body{padding:20px 22px}
-
-/* Step list */
 .steps{list-style:none;padding:0;margin:0;display:grid;gap:14px}
 .step-item{
   display:flex;gap:12px;align-items:flex-start;
@@ -133,8 +121,6 @@
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   word-break:break-all;
 }
-
-/* Copy row */
 .copy-row{
   display:flex;align-items:center;gap:10px;
   padding:12px 14px;border-radius:11px;
@@ -162,10 +148,6 @@
 }
 .copy-row .copy-btn:hover{background:rgba(56,189,248,.24)}
 .copy-row .copy-btn:active{transform:scale(.96)}
-
-/* ============================================================
-   UI MOCKUP (fake screenshots)
-   ============================================================ */
 .ui-mock{
   margin-top:16px;
   border-radius:14px;overflow:hidden;
@@ -237,7 +219,6 @@
   0%,100%{background:rgba(56,189,248,.06)}
   50%{background:rgba(56,189,248,.14)}
 }
-
 .ui-form{
   display:grid;gap:10px;
   padding:14px;
@@ -293,19 +274,6 @@
   color:#fcd34d;font-size:.7rem;
   margin-top:10px;line-height:1.5;
 }
-
-/* Arrow pointer to highlight */
-.ui-arrow{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 10px;border-radius:999px;
-  font-size:.68rem;font-weight:700;
-  background:rgba(56,189,248,.14);
-  color:var(--accent);
-  border:1px solid rgba(56,189,248,.4);
-  margin:8px 0;
-}
-
-/* Terminal mock */
 .term{
   padding:14px 16px;border-radius:12px;
   background:#050810;
@@ -329,8 +297,6 @@
   font-size:.68rem;color:var(--muted);
   letter-spacing:.06em;text-transform:uppercase;font-weight:700;
 }
-
-/* Troubleshoot */
 .trouble-grid{
   display:grid;gap:14px;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -354,8 +320,6 @@
   font-size:.74rem;color:#fca5a5;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-
-/* Section headers */
 .setup-section{margin:60px 0}
 .setup-section-head{
   display:flex;align-items:center;gap:12px;margin-bottom:22px;
@@ -372,8 +336,6 @@
 .setup-section-head p{
   width:100%;font-size:.85rem;color:var(--muted);margin:4px 0 0;
 }
-
-/* Responsive */
 @media (max-width:640px){
   .setup-tabs{padding:5px;border-radius:14px;width:100%}
   .setup-tab{padding:10px 12px;font-size:.78rem;flex:1;justify-content:center}
@@ -425,7 +387,6 @@
       <p>Step-by-step visual instructions for setting up DNS records on every major hosting provider.</p>
     </div>
 
-    <!-- METHOD TABS -->
     <div class="setup-tabs" role="tablist">
       <button class="setup-tab active" data-method="dns" role="tab">
         <svg class="ic ic-sm"><use href="#i-globe"/></svg> DNS-01
@@ -455,7 +416,6 @@
         </div>
       </div>
 
-      <!-- STEP 1: GET VALUES -->
       <div class="setup-section">
         <div class="setup-section-head">
           <span class="num-badge">1</span>
@@ -481,7 +441,6 @@
         </div>
       </div>
 
-      <!-- STEP 2: PROVIDERS -->
       <div class="setup-section">
         <div class="setup-section-head">
           <span class="num-badge">2</span>
@@ -491,7 +450,7 @@
 
         <div class="provider-grid">
 
-          <!-- ========== CLOUDFLARE ========== -->
+          <!-- ========== 1. CLOUDFLARE ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo cf">CF</div>
@@ -538,9 +497,7 @@
                   <div class="ui-form">
                     <div class="ui-form-row">
                       <label>Type</label>
-                      <select class="ui-select hl">
-                        <option>TXT</option>
-                      </select>
+                      <select class="ui-select hl"><option>TXT</option></select>
                     </div>
                     <div class="ui-form-row">
                       <label>Name</label>
@@ -552,9 +509,7 @@
                     </div>
                     <div class="ui-form-row">
                       <label>TTL</label>
-                      <select class="ui-select">
-                        <option>Auto</option>
-                      </select>
+                      <select class="ui-select"><option>Auto</option></select>
                     </div>
                     <div class="ui-save">Save</div>
                   </div>
@@ -562,13 +517,13 @@
               </div>
 
               <div class="ui-note">
-                💡 <b>Tip:</b> Cloudflare typically propagates within <b>1–5 minutes</b>.
-                Do <b>not</b> enable the proxy (orange cloud) for this record — leave it as DNS-only.
+                💡 Cloudflare typically propagates within <b>1–5 minutes</b>.
+                Leave the proxy (orange cloud) <b>off</b> for this record.
               </div>
             </div>
           </div>
 
-          <!-- ========== NAMECHEAP ========== -->
+          <!-- ========== 2. NAMECHEAP ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo nc">NC</div>
@@ -613,9 +568,7 @@
                     <span class="ui-add-btn">+ Add New Record</span>
                   </div>
                   <table class="ui-table">
-                    <thead>
-                      <tr><th>Type</th><th>Host</th><th>Value</th><th>TTL</th></tr>
-                    </thead>
+                    <thead><tr><th>Type</th><th>Host</th><th>Value</th><th>TTL</th></tr></thead>
                     <tbody>
                       <tr>
                         <td class="type">A</td>
@@ -641,7 +594,7 @@
             </div>
           </div>
 
-          <!-- ========== GODADDY ========== -->
+          <!-- ========== 3. GODADDY ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo gd">GD</div>
@@ -708,13 +661,13 @@
               </div>
 
               <div class="ui-note">
-                ⚠️ GoDaddy's DNS panel is slow. If propagation takes &gt;1 hour, try
-                <b>flushing your resolver cache</b> or querying a public resolver like <code>1.1.1.1</code>.
+                ⚠️ GoDaddy's DNS panel is slow. If propagation takes &gt;1 hour, try flushing your resolver
+                cache or querying a public resolver like <code>1.1.1.1</code>.
               </div>
             </div>
           </div>
 
-          <!-- ========== HOSTINGER ========== -->
+          <!-- ========== 4. HOSTINGER ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo hs">HG</div>
@@ -759,16 +712,9 @@
                     <span class="ui-add-btn">+ Add Record</span>
                   </div>
                   <table class="ui-table">
-                    <thead>
-                      <tr><th>Type</th><th>Name</th><th>Content</th><th>TTL</th></tr>
-                    </thead>
+                    <thead><tr><th>Type</th><th>Name</th><th>Content</th><th>TTL</th></tr></thead>
                     <tbody>
-                      <tr>
-                        <td class="type">A</td>
-                        <td>@</td>
-                        <td>192.0.2.1</td>
-                        <td>14400</td>
-                      </tr>
+                      <tr><td class="type">A</td><td>@</td><td>192.0.2.1</td><td>14400</td></tr>
                       <tr class="hl-row">
                         <td class="type hl">TXT</td>
                         <td class="hl">_letssecure-challenge</td>
@@ -782,7 +728,7 @@
             </div>
           </div>
 
-          <!-- ========== FREEDNS ========== -->
+          <!-- ========== 5. FREEDNS ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo fd">FD</div>
@@ -855,7 +801,7 @@
             </div>
           </div>
 
-          <!-- ========== GOOGLE CLOUD DNS ========== -->
+          <!-- ========== 6. GOOGLE CLOUD DNS ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo gc">GC</div>
@@ -922,12 +868,11 @@
 
               <div class="ui-note">
                 💡 Google DNS requires the RDATA value to be wrapped in <b>double quotes</b>.
-                Include them exactly.
               </div>
             </div>
           </div>
 
-          <!-- ========== AWS ROUTE 53 ========== -->
+          <!-- ========== 7. AWS ROUTE 53 ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo aws">53</div>
@@ -993,7 +938,7 @@
             </div>
           </div>
 
-          <!-- ========== DIGITALOCEAN ========== -->
+          <!-- ========== 8. DIGITALOCEAN ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo do">DO</div>
@@ -1058,7 +1003,7 @@
             </div>
           </div>
 
-          <!-- ========== cPanel ========== -->
+          <!-- ========== 9. cPanel ========== -->
           <div class="glass provider-card">
             <div class="provider-head">
               <div class="provider-logo cp">cP</div>
@@ -1102,16 +1047,9 @@
                     <span class="ui-add-btn">+ Add Record</span>
                   </div>
                   <table class="ui-table">
-                    <thead>
-                      <tr><th>Name</th><th>TTL</th><th>Type</th><th>Record</th></tr>
-                    </thead>
+                    <thead><tr><th>Name</th><th>TTL</th><th>Type</th><th>Record</th></tr></thead>
                     <tbody>
-                      <tr>
-                        <td>example.com.</td>
-                        <td>14400</td>
-                        <td class="type">A</td>
-                        <td>192.0.2.1</td>
-                      </tr>
+                      <tr><td>example.com.</td><td>14400</td><td class="type">A</td><td>192.0.2.1</td></tr>
                       <tr class="hl-row">
                         <td class="hl">_letssecure-challenge.example.com.</td>
                         <td class="hl">300</td>
@@ -1125,7 +1063,865 @@
 
               <div class="ui-note">
                 💡 cPanel requires a <b>trailing dot</b> at the end of the record name.
-                Example: <code>_letssecure-challenge.example.com.</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 10. VERCEL ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#000,#333)">▲</div>
+              <div>
+                <h3>Vercel</h3>
+                <p>Frontend cloud · 1–2 min propagation</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open your Vercel project</strong>
+                    <p>Go to <code>vercel.com/dashboard</code> → select your project.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "Domains" → "Edit"</strong>
+                    <p>Find your domain, then click <b>Edit</b> → <b>View DNS Records</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add a TXT record</strong>
+                    <p>Fill the form as shown:</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">vercel.com/dashboard/project/domains</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9d4e5f6…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>60 seconds</option></select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 11. NETLIFY ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#00c7b7,#009688)">NL</div>
+              <div>
+                <h3>Netlify</h3>
+                <p>Static site hosting</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Netlify dashboard</strong>
+                    <p><code>app.netlify.com</code> → select your site.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Site settings → Domain management</strong>
+                    <p>Select your domain → <b>DNS records</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add a new record</strong>
+                    <p>Choose <b>TXT</b> type.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">app.netlify.com/sites/…/settings/domain#dns</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS records</span>
+                    <span class="ui-add-btn">+ Add new record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Record type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9d4e5f6…</div>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 12. RENDER ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#46e3b7,#1c9c7b);color:#0b1020">R</div>
+              <div>
+                <h3>Render</h3>
+                <p>The same platform hosting this CA</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Render dashboard</strong>
+                    <p><code>dashboard.render.com</code> → select your service.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Settings → Custom Domains</strong>
+                    <p>Click <b>Add Custom Domain</b> or edit your existing one.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add DNS record</strong>
+                    <p>Add a <b>TXT</b> record under <b>DNS Records</b> section.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">dashboard.render.com/web/srv-xxxx/settings</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Custom Domains</span>
+                    <span class="ui-add-btn">+ Add Domain</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Domain</label>
+                      <div class="ui-input hl">example.com</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Add DNS record</label>
+                      <div class="ui-input hl">TXT  _letssecure-challenge  →  ls-verify-…</div>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 13. RAILWAY ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#13111c,#8b5cf6)">RW</div>
+              <div>
+                <h3>Railway</h3>
+                <p>Instant deployment platform</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Railway project</strong>
+                    <p><code>railway.app</code> → your project.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Settings → Domains</strong>
+                    <p>Click <b>+ Custom Domain</b> → enter your domain.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add TXT record</strong>
+                    <p>In the DNS records panel that appears.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">railway.app/project/…/settings/domains</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Domains</span>
+                    <span class="ui-add-btn">+ Custom Domain</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 14. FIREBASE HOSTING ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#ffa000,#f57c00)">🔥</div>
+              <div>
+                <h3>Firebase Hosting</h3>
+                <p>Google's web hosting</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Firebase Console → Hosting</strong>
+                    <p><code>console.firebase.google.com</code> → your project → Hosting.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Add custom domain</strong>
+                    <p>Click <b>Add custom domain</b> → enter domain.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Choose "Add TXT record manually"</strong>
+                    <p>Firebase shows the record — but for our CA, use <b>our</b> values.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">console.firebase.google.com/project/…/hosting/main</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">Connect custom domain</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Record Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Host / Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-save">Verify</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                ⚠️ Firebase's own "Verify" prompt is <b>separate</b> from our CA verification.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 15. PORKBUN ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#ff90bb,#ec4899)">🐷</div>
+              <div>
+                <h3>Porkbun</h3>
+                <p>Popular registrar · Clean UI</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Log in to Porkbun</strong>
+                    <p><code>porkbun.com/account/domainsSpeedy</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "DNS Records" next to your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add TXT record</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">porkbun.com/account/dns/example.com</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT Record</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Host</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Answer / Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>600</option></select>
+                    </div>
+                    <div class="ui-save">Add Record</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 16. SQUARESPACE DOMAINS ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#000,#1f1f1f)">SQ</div>
+              <div>
+                <h3>Squarespace Domains</h3>
+                <p>Formerly Google Domains</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Log in to Squarespace</strong>
+                    <p><code>account.squarespace.com/domains</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click your domain → DNS → DNS Settings</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add a TXT record</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">account.squarespace.com/domains/…/dns-settings</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Settings</span>
+                    <span class="ui-add-btn">+ Add record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Host</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Data</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>1 hour</option></select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 17. AZURE DNS ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#0078d4,#005a9e)">Az</div>
+              <div>
+                <h3>Azure DNS</h3>
+                <p>Microsoft's DNS service</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Azure Portal</strong>
+                    <p><code>portal.azure.com</code> → search <b>DNS zones</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Select your zone</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>+ Record set → Type TXT</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">portal.azure.com/#resource/dnszones/example.com</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS zone · example.com</span>
+                    <span class="ui-add-btn">+ Record set</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL (seconds)</label>
+                      <div class="ui-input">300</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>VALUE</label>
+                      <div class="ui-input hl">"ls-verify-a3f8b2c9…"</div>
+                    </div>
+                    <div class="ui-save">OK</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                ⚠️ Azure DNS requires the value wrapped in <b>double quotes</b>.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 18. ALIBABA CLOUD ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#ff6a00,#ff4500)">阿</div>
+              <div>
+                <h3>Alibaba Cloud DNS</h3>
+                <p>Popular in Asia</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Alibaba Cloud Console</strong>
+                    <p><code>dns.console.aliyun.com</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Domain Name Resolution → click your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add Record → Type TXT</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">dns.console.aliyun.com/#/dns/domainList</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records — example.com</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Record Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Hostname</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Record Value</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>10 minutes</option></select>
+                    </div>
+                    <div class="ui-save">Confirm</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 19. HETZNER DNS ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#d50c2d,#a00920)">Hz</div>
+              <div>
+                <h3>Hetzner DNS</h3>
+                <p>European hosting · Fast &amp; free</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Hetzner DNS Console</strong>
+                    <p><code>dns.hetzner.com</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click your zone</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add Record → Type TXT</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">dns.hetzner.com/zone/example.com</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">example.com — Zone file</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">"ls-verify-a3f8b2c9…"</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>300</option></select>
+                    </div>
+                    <div class="ui-save">Save Record</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ui-note">
+                💡 Hetzner DNS is completely free and one of the fastest. Requires quotes around TXT values.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 20. VULTR DNS ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#007bfc,#0056b3)">Vu</div>
+              <div>
+                <h3>Vultr DNS</h3>
+                <p>VPS + DNS</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Vultr Console</strong>
+                    <p><code>my.vultr.com</code> → <b>DNS</b>.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add Record → Type TXT</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">my.vultr.com/dns/example.com</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS — example.com</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Data</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>300</option></select>
+                    </div>
+                    <div class="ui-save">Add</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 21. LINODE / AKAMAI ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#00b259,#008a44)">Li</div>
+              <div>
+                <h3>Linode / Akamai DNS</h3>
+                <p>Now part of Akamai</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Open Cloud Manager</strong>
+                    <p><code>cloud.linode.com/domains</code></p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add a TXT record</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">cloud.linode.com/domains/example.com</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">example.com</span>
+                    <span class="ui-add-btn">+ Add a Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Hostname</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Value</label>
+                      <div class="ui-input hl">"ls-verify-a3f8b2c9…"</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>Default</option></select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== 22. NJALLA ========== -->
+          <div class="glass provider-card">
+            <div class="provider-head">
+              <div class="provider-logo" style="background:linear-gradient(135deg,#111,#2d2d2d)">Nj</div>
+              <div>
+                <h3>Njalla</h3>
+                <p>Privacy-focused registrar</p>
+              </div>
+            </div>
+            <div class="provider-body">
+              <ol class="steps">
+                <li class="step-item">
+                  <span class="step-num">1</span>
+                  <div class="step-content">
+                    <strong>Log in to Njalla</strong>
+                    <p><code>njal.la</code> → your domains.</p>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">2</span>
+                  <div class="step-content">
+                    <strong>Click "DNS" next to your domain</strong>
+                  </div>
+                </li>
+                <li class="step-item">
+                  <span class="step-num">3</span>
+                  <div class="step-content">
+                    <strong>Add a TXT record</strong>
+                  </div>
+                </li>
+              </ol>
+
+              <div class="ui-mock">
+                <div class="ui-bar">
+                  <span class="ui-dots"><span class="ui-dot r"></span><span class="ui-dot y"></span><span class="ui-dot g"></span></span>
+                  <span class="ui-url">njal.la/domains/example.com/dns</span>
+                </div>
+                <div class="ui-body">
+                  <div class="ui-toolbar">
+                    <span class="ui-title">DNS Records</span>
+                    <span class="ui-add-btn">+ Add Record</span>
+                  </div>
+                  <div class="ui-form">
+                    <div class="ui-form-row">
+                      <label>Type</label>
+                      <select class="ui-select hl"><option>TXT</option></select>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Name</label>
+                      <div class="ui-input hl">_letssecure-challenge</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>Content</label>
+                      <div class="ui-input hl">ls-verify-a3f8b2c9…</div>
+                    </div>
+                    <div class="ui-form-row">
+                      <label>TTL</label>
+                      <select class="ui-select"><option>300</option></select>
+                    </div>
+                    <div class="ui-save">Save</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1133,7 +1929,6 @@
         </div>
       </div>
 
-      <!-- STEP 3: VERIFY -->
       <div class="setup-section">
         <div class="setup-section-head">
           <span class="num-badge">3</span>
@@ -1162,7 +1957,6 @@
         </div>
       </div>
 
-      <!-- TROUBLESHOOTING -->
       <div class="setup-section">
         <div class="setup-section-head">
           <span class="num-badge">?</span>
@@ -1352,7 +2146,6 @@
 
               <div class="ui-note">
                 💡 On Debian/Ubuntu, the default DocumentRoot is <code>/var/www/html</code>.
-                Check yours with <code>grep DocumentRoot /etc/apache2/sites-enabled/*</code>.
               </div>
             </div>
           </div>
@@ -1434,7 +2227,6 @@
 
               <div class="ui-note">
                 💡 Caddy auto-serves anything in the site's <code>root</code> folder.
-                No extra config needed.
               </div>
             </div>
           </div>
@@ -1583,8 +2375,7 @@
               </div>
 
               <div class="ui-note">
-                ⚠️ Stock open-source Nginx does <b>not</b> support <code>ssl_alpn</code> for custom protocols.
-                You need Nginx Plus.
+                ⚠️ Stock open-source Nginx does <b>not</b> support <code>ssl_alpn</code>.
               </div>
             </div>
           </div>
@@ -1710,7 +2501,6 @@ window.LS_setup = function () {
   function activate(name) {
     tabs.forEach((t) => t.classList.toggle("active", t.dataset.method === name));
     panels.forEach((p) => p.classList.toggle("active", p.dataset.panel === name));
-    // Scroll to top of tabs
     const tabsEl = $(".setup-tabs");
     if (tabsEl) {
       const y = tabsEl.getBoundingClientRect().top + window.scrollY - 100;
@@ -1756,7 +2546,7 @@ window.LS_setup = function () {
   });
 
   /* ==========================================================
-     AUTO-DETECT PROVIDER FROM URL
+     URL PARAM
      ========================================================== */
   const params = new URLSearchParams(location.search);
   const methodParam = params.get("method");
