@@ -115,16 +115,53 @@
             </div>
             <span class="err">Enter a valid email address.</span>
           </div>
+
+          <!-- MCQ STYLE VERIFICATION METHOD -->
           <div class="field" data-field="method">
-            <label for="f-method">Verification Method</label>
-            <div class="input-wrap"><svg class="ic"><use href="#i-shield-check"/></svg>
-              <select id="f-method" name="method">
-                <option value="dns-01" selected>DNS-01 — TXT record (recommended)</option>
-                <option value="http-01">HTTP-01 — Well-known file</option>
-                <option value="tls-alpn-01">TLS-ALPN-01 — Temporary TLS cert (advanced)</option>
-              </select>
+            <label>Verification Method</label>
+            <div class="method-choice" id="method-choice" role="radiogroup" aria-label="Verification method">
+              <label class="method-option selected" data-value="dns-01" role="radio" aria-checked="true" tabindex="0">
+                <span class="method-radio"></span>
+                <span class="method-info">
+                  <span class="method-title">
+                    DNS-01 — TXT record
+                    <span class="method-badge">Recommended</span>
+                  </span>
+                  <span class="method-desc">
+                    Add a TXT record to your DNS provider. Works even when your server is offline. Supports wildcards.
+                  </span>
+                </span>
+              </label>
+
+              <label class="method-option" data-value="http-01" role="radio" aria-checked="false" tabindex="0">
+                <span class="method-radio"></span>
+                <span class="method-info">
+                  <span class="method-title">
+                    HTTP-01 — Well-known file
+                    <span class="method-badge fast">Instant</span>
+                  </span>
+                  <span class="method-desc">
+                    Place a file on your web server at port 80. Verifies immediately, no DNS wait.
+                  </span>
+                </span>
+              </label>
+
+              <label class="method-option" data-value="tls-alpn-01" role="radio" aria-checked="false" tabindex="0">
+                <span class="method-radio"></span>
+                <span class="method-info">
+                  <span class="method-title">
+                    TLS-ALPN-01 — Temporary TLS cert
+                    <span class="method-badge adv">Advanced</span>
+                  </span>
+                  <span class="method-desc">
+                    Install a temporary certificate on port 443 with ALPN <b>acme-tls/1</b>. Requires custom server config.
+                  </span>
+                </span>
+              </label>
             </div>
+            <input type="hidden" id="f-method" name="method" value="dns-01" />
           </div>
+
           <div class="form-actions">
             <button type="submit" class="btn btn-primary" id="issue-btn">
               <svg class="ic ic-sm"><use href="#i-key"/></svg> Request Certificate
@@ -134,6 +171,7 @@
             </button>
           </div>
         </form>
+
         <aside class="glass result-card reveal" id="issue-result" aria-live="polite">
           <div class="result-empty">
             <div class="ring"><svg class="ic ic-xl"><use href="#i-shield"/></svg></div>
@@ -261,17 +299,51 @@
 <script>
 window.LS_home = function () {
   "use strict";
-  const { $, $$, escapeHtml, fmtDate, fmtCountdown, toast, sleep, apiRequest, apiAuth,
-    getToken, setAuth, clearAuth, copyText, downloadFile, getCachedCertIds, cacheCertId,
-    DOMAIN_RE, EMAIL_RE, CERT_ID_RE, setFieldError, clearFieldErrors,
+  const { $, escapeHtml, fmtDate, fmtCountdown, toast, sleep, apiRequest,
+    copyText, downloadFile, getCachedCertIds, cacheCertId,
+    DOMAIN_RE, EMAIL_RE, setFieldError, clearFieldErrors,
     renderAdvancedError, classifyError } = LS;
+  const API = LS.API;
+
+  /* ==========================================================
+     METHOD CHOICE (MCQ style)
+     ========================================================== */
+  function initMethodChoice() {
+    const wrap = document.getElementById("method-choice");
+    const hidden = document.getElementById("f-method");
+    if (!wrap || !hidden) return;
+
+    const options = wrap.querySelectorAll(".method-option");
+
+    function select(opt) {
+      options.forEach((o) => {
+        const on = o === opt;
+        o.classList.toggle("selected", on);
+        o.setAttribute("aria-checked", String(on));
+      });
+      hidden.value = opt.dataset.value;
+    }
+
+    options.forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.preventDefault();
+        select(opt);
+      });
+      opt.addEventListener("keydown", (e) => {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          select(opt);
+        }
+      });
+    });
+  }
+  initMethodChoice();
 
   /* ==========================================================
      CERTIFICATE REQUEST FLOW
      ========================================================== */
   const form = $("#cert-form");
   const resultBox = $("#issue-result");
-  const API = LS.API;
 
   let currentChallenge = null;
   let challengeTimerInterval = null;
@@ -301,13 +373,11 @@ window.LS_home = function () {
     const hasError = !!challenge.lastError;
     const attempts = challenge.attempts || 0;
 
-    /* -------- Error classification -------- */
     let errorHtml = "";
     let statusHtml = "";
 
     if (hasError) {
       const info = classifyError(new Error(challenge.lastError));
-      // Use challenge-specific hints when possible
       let hints = info.hints;
       const lower = challenge.lastError.toLowerCase();
 
@@ -367,7 +437,6 @@ window.LS_home = function () {
         "</div>";
     }
 
-    /* -------- Method-specific record UI -------- */
     let recordRows = "";
     if (isTls) {
       recordRows =
@@ -567,7 +636,6 @@ window.LS_home = function () {
           body: JSON.stringify(data),
         });
 
-        // Case A: pre-verified domain → certificate issued directly
         if (res.status === "issued" && res.certificate) {
           cacheCertId(res.certificate.certId);
           renderIssued(res.certificate);
@@ -575,7 +643,6 @@ window.LS_home = function () {
           return;
         }
 
-        // Case B: challenge pending
         renderChallenge(res.challenge);
         toast("Challenge created. Complete the verification to get your certificate.", "info", 5000);
       } catch (err) {
@@ -592,6 +659,18 @@ window.LS_home = function () {
     form.addEventListener("reset", () => {
       clearFieldErrors();
       renderInitial();
+      // Reset method choice to DNS-01
+      const wrap = document.getElementById("method-choice");
+      if (wrap) {
+        const opts = wrap.querySelectorAll(".method-option");
+        opts.forEach((o) => {
+          const on = o.dataset.value === "dns-01";
+          o.classList.toggle("selected", on);
+          o.setAttribute("aria-checked", String(on));
+        });
+      }
+      const hidden = document.getElementById("f-method");
+      if (hidden) hidden.value = "dns-01";
     });
   }
 
@@ -660,7 +739,7 @@ window.LS_home = function () {
         downloadFile(id + ".pem", pem);
         toast("Downloaded " + id + ".pem", "ok");
       } catch (err) {
-        renderAdvancedError($("#root-ca-error") || resultBox, err);
+        renderAdvancedError(resultBox, err);
       }
     }
     if (action === "copy-cert-id") {
@@ -725,7 +804,7 @@ window.LS_home = function () {
     });
   }
 
-  /* Prefill anything from query string */
+  /* Prefill */
   const params = new URLSearchParams(location.search);
   if (params.get("domain")) {
     const d = $("#f-domain"); if (d) d.value = params.get("domain");
