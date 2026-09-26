@@ -239,6 +239,103 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
 .feature::before{content:"";position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.65),transparent);opacity:0;transition:opacity .45s}
 .feature:hover::before{opacity:1}
 
+/* ============================================================
+   ROOT CA DOWNLOAD SECTION
+   ============================================================ */
+.root-ca-card {
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.root-ca-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: linear-gradient(140deg, rgba(31,111,235,.25), rgba(124,58,237,.25));
+  border: 1px solid rgba(56,189,248,.35);
+  color: var(--accent);
+  box-shadow: 0 0 40px -12px rgba(56,189,248,.7);
+  animation: rcPulse 3s ease-in-out infinite;
+}
+@keyframes rcPulse {
+  0%,100% { box-shadow: 0 0 40px -12px rgba(56,189,248,.7); }
+  50%     { box-shadow: 0 0 50px -8px rgba(56,189,248,.95); }
+}
+.root-ca-info { flex: 1; min-width: 220px; }
+.root-ca-info h3 { font-size: 1.15rem; margin-bottom: 6px; }
+.root-ca-info > p { color: var(--muted); font-size: .86rem; margin-bottom: 14px; }
+.root-ca-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.rc-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.rc-key {
+  font-size: .68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 700;
+}
+.rc-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .78rem;
+  color: #a5b7d1;
+}
+.root-ca-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.root-ca-install-hint {
+  margin-top: 26px;
+  padding: 24px;
+}
+.root-ca-install-hint h4 {
+  font-size: .95rem;
+  margin-bottom: 16px;
+  color: #cbd5e1;
+}
+.install-steps-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.install-step-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(8,12,24,.6);
+  border: 1px solid var(--line);
+  transition: border-color .25s, transform .25s;
+}
+.install-step-card:hover {
+  border-color: rgba(56,189,248,.4);
+  transform: translateY(-2px);
+}
+.install-step-card strong {
+  display: block;
+  font-size: .82rem;
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+.install-step-card p {
+  font-size: .76rem;
+  color: var(--muted);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .root-ca-card { padding: 22px 18px; }
+  .root-ca-icon { width: 64px; height: 64px; border-radius: 18px; }
+  .root-ca-actions .btn { width: 100%; }
+  .root-ca-install-hint { padding: 20px 16px; }
+}
+
 /* Page head + tools */
 .page-head{padding:60px 0 8px;text-align:center}
 .page-head h1{font-size:clamp(1.75rem,4.2vw,2.6rem);margin-bottom:12px}
@@ -509,6 +606,83 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       </section>
     </div>
 
+    <!-- ROOT CA DOWNLOAD SECTION -->
+    <div class="container">
+      <section class="section" id="trust-root">
+        <div class="section-head reveal">
+          <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg> Trust Anchor</span>
+          <h2>Download the Root CA Certificate</h2>
+          <p>Install our Root CA on your device or server to trust every certificate issued by Let-S Secure.</p>
+        </div>
+
+        <div class="root-ca-card glass reveal">
+          <div class="root-ca-icon">
+            <svg class="ic ic-xl"><use href="#i-shield-check"/></svg>
+          </div>
+          <div class="root-ca-info">
+            <h3>Let-S Secure Root CA</h3>
+            <p>X.509 v3 self-signed certificate · ready to install on any platform</p>
+            <div class="root-ca-meta">
+              <div class="rc-meta-item">
+                <span class="rc-key">Algorithm</span>
+                <span class="rc-val">RSA-4096 / SHA-256</span>
+              </div>
+              <div class="rc-meta-item">
+                <span class="rc-key">Format</span>
+                <span class="rc-val">PEM (.pem / .crt)</span>
+              </div>
+              <div class="rc-meta-item">
+                <span class="rc-key">Validity</span>
+                <span class="rc-val">10 years</span>
+              </div>
+              <div class="rc-meta-item">
+                <span class="rc-key">Type</span>
+                <span class="rc-val">Private CA</span>
+              </div>
+            </div>
+          </div>
+          <div class="root-ca-actions">
+            <button class="btn btn-primary" id="download-root-ca-btn">
+              <svg class="ic ic-sm"><use href="#i-download"/></svg> Download Root CA
+            </button>
+            <button class="btn btn-ghost btn-sm" id="copy-root-ca-btn">
+              <svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy PEM
+            </button>
+          </div>
+        </div>
+
+        <div class="glass root-ca-install-hint reveal">
+          <h4>📱 How to install the Root CA</h4>
+          <div class="install-steps-grid">
+            <div class="install-step-card">
+              <strong>Android</strong>
+              <p>Settings → Security → Encryption &amp; credentials → Install a certificate → CA certificate</p>
+            </div>
+            <div class="install-step-card">
+              <strong>iOS / iPadOS</strong>
+              <p>Download via Safari → Settings → Profile Downloaded → Install → Enable Full Trust in Certificate Trust Settings</p>
+            </div>
+            <div class="install-step-card">
+              <strong>Windows</strong>
+              <p>Double-click the file → Install Certificate → Local Machine → Trusted Root Certification Authorities</p>
+            </div>
+            <div class="install-step-card">
+              <strong>macOS</strong>
+              <p>Open in Keychain Access → System → drag file → set to "Always Trust"</p>
+            </div>
+            <div class="install-step-card">
+              <strong>Linux (Debian / Ubuntu)</strong>
+              <p>sudo cp root-ca.pem /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</p>
+            </div>
+            <div class="install-step-card">
+              <strong>Nginx / Apache Server</strong>
+              <p>cat leaf.pem root-ca.pem &gt; bundle.crt, then point ssl_certificate to bundle.crt</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <!-- Features -->
     <div class="container">
       <section class="section" id="features">
@@ -688,6 +862,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     <div class="footer-col">
       <h4>Resources</h4>
       <a data-goto="home" data-anchor="#request">Generate Certificate</a>
+      <a data-goto="home" data-anchor="#trust-root">Download Root CA</a>
       <a data-goto="home" data-anchor="#features">Features</a>
       <a data-page="admin">Admin Panel</a>
     </div>
@@ -881,7 +1056,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
     if (page === "status") refreshStatusList();
     if (page === "admin") renderAdminState();
 
-    // Prefill verify input from cache
     if (page === "verify") {
       const ids = getCachedCertIds();
       const vi = $("#verify-input");
@@ -916,7 +1090,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     NAVIGATION (data-goto, data-page, footer links)
+     NAVIGATION
      ========================================================== */
   document.addEventListener("click", (e) => {
     const gotoEl = e.target.closest("[data-goto]");
@@ -959,7 +1133,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     CERT CACHE (for UI convenience only)
+     CERT CACHE
      ========================================================== */
   const CACHE_KEY = "ls_cert_ids_v1";
   function getCachedCertIds() {
@@ -995,7 +1169,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     ISSUE CERTIFICATE (Home form → Render API)
+     ISSUE CERTIFICATE
      ========================================================== */
   const form = $("#cert-form");
   const resultBox = $("#issue-result");
@@ -1224,7 +1398,53 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     VERIFY PAGE → Render API
+     ROOT CA DOWNLOAD
+     ========================================================== */
+  const downloadRootCaBtn = $("#download-root-ca-btn");
+  const copyRootCaBtn = $("#copy-root-ca-btn");
+
+  async function fetchRootCaPem() {
+    const res = await fetch(API.rootCaPem, { cache: "no-store" });
+    if (!res.ok) {
+      let msg = "Root CA not available";
+      try { const j = await res.json(); msg = j.error || msg; } catch {}
+      throw new Error(msg);
+    }
+    return res.text();
+  }
+
+  if (downloadRootCaBtn) {
+    downloadRootCaBtn.addEventListener("click", async () => {
+      downloadRootCaBtn.disabled = true;
+      try {
+        const pem = await fetchRootCaPem();
+        downloadFile("lets-secure-root-ca.pem", pem);
+        toast("Downloaded Root CA certificate.", "ok");
+      } catch (err) {
+        toast("Download failed: " + err.message, "err");
+      } finally {
+        downloadRootCaBtn.disabled = false;
+      }
+    });
+  }
+
+  if (copyRootCaBtn) {
+    copyRootCaBtn.addEventListener("click", async () => {
+      copyRootCaBtn.disabled = true;
+      try {
+        const pem = await fetchRootCaPem();
+        const ok = await copyText(pem);
+        toast(ok ? "Root CA PEM copied to clipboard." : "Copy failed.", ok ? "ok" : "err");
+      } catch (err) {
+        toast("Could not fetch Root CA: " + err.message, "err");
+      } finally {
+        copyRootCaBtn.disabled = false;
+      }
+    });
+  }
+
+  /* ==========================================================
+     VERIFY PAGE
      ========================================================== */
   const verifyInput = $("#verify-input");
   const verifyBtn = $("#verify-btn");
@@ -1271,12 +1491,8 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       if (CERT_ID_RE.test(q)) {
         result = await api.verifyCert({ certId: q.toUpperCase() });
       } else if (DOMAIN_RE.test(q)) {
-        // Fall back to domain-based verification by looking up via public cert endpoint
-        // The backend exposes /api/certificates/domain/:domain
         const res = await fetch(`${API_BASE}/api/certificates/domain/${encodeURIComponent(q.toLowerCase())}`);
-        if (!res.ok) {
-          throw new Error("No certificate found for that domain");
-        }
+        if (!res.ok) throw new Error("No certificate found for that domain");
         const j = await res.json();
         cert = j.certificate;
         result = { valid: cert.status === "active", reason: cert.status === "active" ? "" : "Certificate " + cert.status };
@@ -1285,7 +1501,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
       }
 
       if (!cert && result && result.valid !== undefined) {
-        // fetch metadata for display
         const idMatch = q.match(CERT_ID_RE);
         if (idMatch) {
           try {
@@ -1355,7 +1570,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   });
 
   /* ==========================================================
-     STATUS PAGE → Render API
+     STATUS PAGE
      ========================================================== */
   const statusInput = $("#status-input");
   const statusBtn = $("#status-btn");
@@ -1438,7 +1653,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   async function refreshStatusList() {
     if (!statusList) return;
     statusList.innerHTML = '<div class="empty-state"><span class="spinner" style="display:inline-block;margin-right:8px;vertical-align:middle"></span>Loading certificates…</div>';
-    // The public API has no list endpoint, so we only show cached IDs.
     const ids = getCachedCertIds();
     if (!ids.length) {
       statusList.innerHTML = '<div class="empty-state">No certificates issued from this browser yet. Generate one from the Home page.</div>';
@@ -1475,7 +1689,7 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   }
 
   /* ==========================================================
-     DOWNLOAD PAGE → Render API
+     DOWNLOAD PAGE
      ========================================================== */
   const downloadInput = $("#download-input");
   const downloadBtn = $("#download-btn");
@@ -1730,7 +1944,6 @@ h2{font-size:clamp(1.7rem,3.6vw,2.35rem);margin-bottom:12px}
   initReveal();
   render(parseHash());
 
-  // Prefill placeholders with cached IDs
   const cachedIds = getCachedCertIds();
   if (cachedIds.length && verifyInput) {
     verifyInput.placeholder = "Try: " + cachedIds[0];
