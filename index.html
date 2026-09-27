@@ -8,50 +8,78 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.5 4.5 5.6v5.6c0 4.9 3.2 9.2 7.5 10.3 4.3-1.1 7.5-5.4 7.5-10.3V5.6L12 2.5Z' fill='none' stroke='%2338bdf8' stroke-width='1.7'/></svg>" />
 <link rel="stylesheet" href="assets/style.css" />
 <style>
-/* Setup help block — inline fallback (in case style.css hasn't been updated yet) */
-.setup-help-block{
-  margin-top:18px;padding:18px 20px;border-radius:14px;
-  background:linear-gradient(140deg,rgba(56,189,248,.09),rgba(124,58,237,.06));
-  border:1px solid rgba(56,189,248,.28);
-  animation:pageIn .5s var(--ease) both;
+/* Private key panel — one-time display */
+.private-key-panel{
+  margin-top:20px;padding:20px;border-radius:16px;
+  background:linear-gradient(140deg,rgba(245,158,11,.14),rgba(245,158,11,.04));
+  border:1.5px solid rgba(245,158,11,.6);
+  animation:errShake .55s var(--ease) both;
+  box-shadow:0 0 40px -12px rgba(245,158,11,.6);
 }
-.setup-help-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.setup-help-head .sh-icon{
-  width:34px;height:34px;border-radius:10px;flex:none;
+.private-key-panel .pk-head{
+  display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;
+}
+.private-key-panel .pk-icon{
+  width:44px;height:44px;border-radius:50%;flex:none;
   display:grid;place-items:center;
-  background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.4);color:var(--accent);
+  background:rgba(245,158,11,.22);
+  border:1px solid rgba(245,158,11,.55);
+  color:#fcd34d;
+  box-shadow:0 0 24px -4px rgba(245,158,11,.9);
 }
-.setup-help-head .sh-text{flex:1;min-width:0}
-.setup-help-head h4{font-size:.88rem;margin:0 0 2px;color:#fff;font-weight:700}
-.setup-help-head p{font-size:.74rem;margin:0;color:var(--muted);line-height:1.5}
-.setup-help-links{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
-.setup-help-link{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:11px 14px;border-radius:11px;
-  background:rgba(8,12,24,.62);border:1px solid rgba(255,255,255,.08);
-  color:#cbd5e1;font-size:.8rem;font-weight:600;text-decoration:none;cursor:pointer;
-  transition:border-color .25s,background .25s,transform .2s;
+.private-key-panel .pk-head h4{
+  font-size:1.05rem;margin:0 0 4px;color:#fcd34d;font-weight:800;
 }
-.setup-help-link:hover{
-  border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.09);
-  color:#fff;transform:translateY(-2px);
+.private-key-panel .pk-head p{
+  font-size:.8rem;color:#fcd34d;margin:0;line-height:1.55;opacity:.9;
 }
-.setup-help-link .shl-tag{
-  font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-  padding:2px 7px;border-radius:5px;flex:none;
+.private-key-panel .pk-box{
+  border-radius:12px;overflow:hidden;
+  border:1px solid rgba(245,158,11,.4);
+  background:rgba(4,8,18,.85);
+  margin-bottom:14px;
 }
-.sh-tag-dns{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#6ee7a8}
-.sh-tag-http{background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.4);color:var(--accent)}
-.sh-tag-tls{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#fcd34d}
-.setup-help-link .shl-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.setup-help-link .shl-arrow{
-  width:14px;height:14px;flex:none;color:var(--muted);
-  transition:transform .25s,color .25s;
+.private-key-panel .pk-box-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:10px 14px;
+  background:rgba(245,158,11,.08);
+  border-bottom:1px solid rgba(245,158,11,.25);
+  font-size:.72rem;color:#fcd34d;
+  letter-spacing:.08em;text-transform:uppercase;font-weight:800;
 }
-.setup-help-link:hover .shl-arrow{transform:translateX(3px);color:var(--accent)}
-@media (max-width:640px){
-  .setup-help-block{padding:16px}
-  .setup-help-links{grid-template-columns:1fr}
+.private-key-panel .pk-body{
+  padding:14px;max-height:240px;overflow:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.7rem;line-height:1.65;color:#fcd34d;
+  white-space:pre-wrap;word-break:break-all;
+}
+.private-key-panel .pk-actions{
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+.private-key-panel .pk-note{
+  padding:12px 14px;border-radius:10px;
+  background:rgba(239,68,68,.1);
+  border:1px solid rgba(239,68,68,.35);
+  font-size:.8rem;color:#fca5a5;line-height:1.6;
+  margin-top:14px;
+}
+.private-key-panel .pk-note b{color:#fecaca}
+.private-key-panel .pk-confirm{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 14px;border-radius:10px;
+  background:rgba(8,12,24,.7);
+  border:1px solid rgba(255,255,255,.1);
+  margin-top:14px;cursor:pointer;user-select:none;
+}
+.private-key-panel .pk-confirm input{
+  width:18px;height:18px;margin-top:2px;flex:none;cursor:pointer;
+  accent-color:var(--ok);
+}
+.private-key-panel .pk-confirm span{
+  font-size:.83rem;color:#cbd5e1;line-height:1.55;
+}
+.private-key-panel .btn[disabled]{
+  opacity:.4;pointer-events:none;
 }
 </style>
 </head>
@@ -122,7 +150,6 @@
     </div>
   </div>
 
-  <!-- REQUEST FORM -->
   <div class="container">
     <section class="section" id="request">
       <div class="section-head reveal">
@@ -152,7 +179,7 @@
           <div class="field" data-field="domain">
             <label for="f-domain">Domain Name</label>
             <div class="input-wrap"><svg class="ic"><use href="#i-globe"/></svg>
-              <input id="f-domain" name="domain" type="text" placeholder="e.g. api.example.com" />
+              <input id="f-domain" name="domain" type="text" placeholder="e.g. api.example.com or *.example.com" />
             </div>
             <span class="err">Enter a valid domain, e.g. api.example.com</span>
           </div>
@@ -164,46 +191,28 @@
             <span class="err">Enter a valid email address.</span>
           </div>
 
-          <!-- MCQ STYLE VERIFICATION METHOD -->
           <div class="field" data-field="method">
             <label>Verification Method</label>
-            <div class="method-choice" id="method-choice" role="radiogroup" aria-label="Verification method">
+            <div class="method-choice" id="method-choice" role="radiogroup">
               <label class="method-option selected" data-value="dns-01" role="radio" aria-checked="true" tabindex="0">
                 <span class="method-radio"></span>
                 <span class="method-info">
-                  <span class="method-title">
-                    DNS-01 — TXT record
-                    <span class="method-badge">Recommended</span>
-                  </span>
-                  <span class="method-desc">
-                    Add a TXT record to your DNS provider. Works even when your server is offline. Supports wildcards.
-                  </span>
+                  <span class="method-title">DNS-01 — TXT record <span class="method-badge">Recommended</span></span>
+                  <span class="method-desc">Add a TXT record to your DNS provider. Supports wildcards.</span>
                 </span>
               </label>
-
               <label class="method-option" data-value="http-01" role="radio" aria-checked="false" tabindex="0">
                 <span class="method-radio"></span>
                 <span class="method-info">
-                  <span class="method-title">
-                    HTTP-01 — Well-known file
-                    <span class="method-badge fast">Instant</span>
-                  </span>
-                  <span class="method-desc">
-                    Place a file on your web server at port 80. Verifies immediately, no DNS wait.
-                  </span>
+                  <span class="method-title">HTTP-01 — Well-known file <span class="method-badge fast">Instant</span></span>
+                  <span class="method-desc">Place a file on your web server at port 80. No DNS wait.</span>
                 </span>
               </label>
-
               <label class="method-option" data-value="tls-alpn-01" role="radio" aria-checked="false" tabindex="0">
                 <span class="method-radio"></span>
                 <span class="method-info">
-                  <span class="method-title">
-                    TLS-ALPN-01 — Temporary TLS cert
-                    <span class="method-badge adv">Advanced</span>
-                  </span>
-                  <span class="method-desc">
-                    Install a temporary certificate on port 443 with ALPN <b>acme-tls/1</b>. Requires custom server config.
-                  </span>
+                  <span class="method-title">TLS-ALPN-01 — Temporary TLS cert <span class="method-badge adv">Advanced</span></span>
+                  <span class="method-desc">Install a temporary certificate on port 443 with ALPN acme-tls/1.</span>
                 </span>
               </label>
             </div>
@@ -219,7 +228,6 @@
             </button>
           </div>
 
-          <!-- SETUP HELP BLOCK -->
           <div class="setup-help-block">
             <div class="setup-help-head">
               <div class="sh-icon"><svg class="ic ic-sm"><use href="#i-info"/></svg></div>
@@ -232,17 +240,17 @@
               <a class="setup-help-link" href="setup.html?method=dns">
                 <span class="shl-tag sh-tag-dns">DNS</span>
                 <span class="shl-label">DNS-01 Setup Guide</span>
-                <svg class="ic shl-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+                <svg class="ic shl-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
               </a>
               <a class="setup-help-link" href="setup.html?method=http">
                 <span class="shl-tag sh-tag-http">HTTP</span>
                 <span class="shl-label">HTTP-01 Setup Guide</span>
-                <svg class="ic shl-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+                <svg class="ic shl-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
               </a>
               <a class="setup-help-link" href="setup.html?method=tls">
                 <span class="shl-tag sh-tag-tls">TLS</span>
                 <span class="shl-label">TLS-ALPN Setup Guide</span>
-                <svg class="ic shl-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+                <svg class="ic shl-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
               </a>
             </div>
           </div>
@@ -259,7 +267,6 @@
     </section>
   </div>
 
-  <!-- ROOT CA DOWNLOAD -->
   <div class="container">
     <section class="section" id="trust-root">
       <div class="section-head reveal">
@@ -295,17 +302,16 @@
         <h4>📱 How to install the Root CA</h4>
         <div class="install-steps-grid">
           <div class="install-step-card"><strong>Android</strong><p>Settings → Security → Encryption &amp; credentials → Install a certificate → CA certificate</p></div>
-          <div class="install-step-card"><strong>iOS / iPadOS</strong><p>Download via Safari → Settings → Profile Downloaded → Install → Enable Full Trust in Certificate Trust Settings</p></div>
-          <div class="install-step-card"><strong>Windows</strong><p>Double-click the file → Install Certificate → Local Machine → Trusted Root Certification Authorities</p></div>
-          <div class="install-step-card"><strong>macOS</strong><p>Open in Keychain Access → System → drag file → set to "Always Trust"</p></div>
+          <div class="install-step-card"><strong>iOS / iPadOS</strong><p>Download via Safari → Settings → Profile Downloaded → Install → Enable Full Trust</p></div>
+          <div class="install-step-card"><strong>Windows</strong><p>Double-click → Install Certificate → Local Machine → Trusted Root Certification Authorities</p></div>
+          <div class="install-step-card"><strong>macOS</strong><p>Keychain Access → System → drag file → set "Always Trust"</p></div>
           <div class="install-step-card"><strong>Linux (Debian)</strong><p>sudo cp root-ca.pem /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</p></div>
-          <div class="install-step-card"><strong>Nginx / Apache</strong><p>cat leaf.pem root-ca.pem &gt; bundle.crt, then point ssl_certificate to bundle.crt</p></div>
+          <div class="install-step-card"><strong>Nginx / Apache</strong><p>cat leaf.pem root-ca.pem &gt; bundle.crt</p></div>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- FEATURES -->
   <div class="container">
     <section class="section" id="features">
       <div class="section-head reveal">
@@ -382,13 +388,12 @@ window.LS_home = function () {
   const API = LS.API;
 
   /* ==========================================================
-     METHOD CHOICE (MCQ style)
+     METHOD CHOICE
      ========================================================== */
   function initMethodChoice() {
     const wrap = document.getElementById("method-choice");
     const hidden = document.getElementById("f-method");
     if (!wrap || !hidden) return;
-
     const options = wrap.querySelectorAll(".method-option");
 
     function select(opt) {
@@ -401,22 +406,16 @@ window.LS_home = function () {
     }
 
     options.forEach((opt) => {
-      opt.addEventListener("click", (e) => {
-        e.preventDefault();
-        select(opt);
-      });
+      opt.addEventListener("click", (e) => { e.preventDefault(); select(opt); });
       opt.addEventListener("keydown", (e) => {
-        if (e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          select(opt);
-        }
+        if (e.key === " " || e.key === "Enter") { e.preventDefault(); select(opt); }
       });
     });
   }
   initMethodChoice();
 
   /* ==========================================================
-     CERTIFICATE REQUEST FLOW
+     STATE
      ========================================================== */
   const form = $("#cert-form");
   const resultBox = $("#issue-result");
@@ -442,6 +441,108 @@ window.LS_home = function () {
       "</div>";
   }
 
+  /* ==========================================================
+     PRIVATE KEY PANEL (NEW — CRITICAL)
+     ========================================================== */
+  function buildPrivateKeyPanel(privateKeyPem, certId) {
+    // Escape the PEM for safe insertion into a <pre>-like element
+    const escaped = escapeHtml(privateKeyPem);
+
+    return (
+      '<div class="private-key-panel">' +
+        '<div class="pk-head">' +
+          '<div class="pk-icon"><svg class="ic ic-lg"><use href="#i-key"/></svg></div>' +
+          "<div>" +
+            "<h4>⚠ Save Your Private Key Now</h4>" +
+            "<p>This is the ONLY time the private key is shown. " +
+              "You will NOT be able to retrieve it again from this page.</p>" +
+          "</div>" +
+        "</div>" +
+
+        '<div class="pk-box">' +
+          '<div class="pk-box-head">' +
+            "<span>" + escapeHtml(certId) + ".key.pem</span>" +
+            "<span>PRIVATE KEY · RSA-2048</span>" +
+          "</div>" +
+          '<div class="pk-body" id="pk-content-' + certId + '">' + escaped + "</div>" +
+        "</div>" +
+
+        '<div class="pk-actions">' +
+          '<button class="btn btn-primary btn-sm" data-action="download-private-key" data-id="' + certId + '">' +
+            '<svg class="ic ic-sm"><use href="#i-download"/></svg> Download Key (.key.pem)' +
+          "</button>" +
+          '<button class="btn btn-ghost btn-sm" data-action="copy-private-key" data-id="' + certId + '">' +
+            '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy to Clipboard' +
+          "</button>" +
+        "</div>" +
+
+        '<label class="pk-confirm">' +
+          '<input type="checkbox" id="pk-confirm-' + certId + '" />' +
+          "<span><b>I have saved my private key securely.</b> " +
+            "I understand that if I lose it, the certificate cannot be used and " +
+            "only an administrator can recover it via the admin panel.</span>" +
+        "</label>" +
+
+        '<div class="pk-note">' +
+          "<b>Security notice:</b> Store the private key in a secure location " +
+          "(password manager, encrypted vault). Never share it via email, chat, " +
+          "or unencrypted storage. The key is encrypted at rest on our server " +
+          "with AES-256-GCM and can be retrieved later by an admin if needed." +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  /* ==========================================================
+     RENDER ISSUED
+     ========================================================== */
+  function renderIssued(cert, privateKeyPem) {
+    clearChallengeTimer();
+    currentChallenge = null;
+
+    const keyPanel = privateKeyPem ? buildPrivateKeyPanel(privateKeyPem, cert.certId) : "";
+
+    resultBox.innerHTML =
+      '<div class="issued-head">' +
+        '<div class="ok-ring"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
+        "<div><h3>Certificate Issued</h3><p>Signed by Let-S Secure Private CA</p></div>" +
+      "</div>" +
+
+      '<div class="data-list">' +
+        '<div class="data-row"><span class="k">Certificate ID</span><span class="v">' + escapeHtml(cert.certId) + "</span></div>" +
+        '<div class="data-row"><span class="k">Domain</span><span class="v">' + escapeHtml(cert.domain) + "</span></div>" +
+        '<div class="data-row"><span class="k">Project</span><span class="v">' + escapeHtml(cert.project) + "</span></div>" +
+        '<div class="data-row"><span class="k">Owner</span><span class="v">' + escapeHtml(cert.owner) + "</span></div>" +
+        '<div class="data-row"><span class="k">Serial</span><span class="v">' + escapeHtml(cert.serialNumber || "—") + "</span></div>" +
+        '<div class="data-row"><span class="k">Valid Until</span><span class="v">' + escapeHtml(fmtDate(cert.expiresAt)) + "</span></div>" +
+      "</div>" +
+
+      (cert.fingerprint
+        ? '<div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:8px">SHA-256 Fingerprint</div>' +
+          '<div class="mono" style="font-size:.71rem;color:#7fa8d4;word-break:break-all;line-height:1.7;margin-bottom:18px">' + escapeHtml(cert.fingerprint) + "</div>"
+        : "") +
+
+      keyPanel +
+
+      '<div class="form-actions" style="margin-top:20px">' +
+        '<button class="btn btn-primary btn-sm" data-action="download-cert-now" data-id="' + cert.certId + '">' +
+          '<svg class="ic ic-sm"><use href="#i-download"/></svg> Download Certificate (.pem)' +
+        "</button>" +
+        '<button class="btn btn-ghost btn-sm" data-action="download-fullchain-now" data-id="' + cert.certId + '">' +
+          '<svg class="ic ic-sm"><use href="#i-download"/></svg> Download Fullchain' +
+        "</button>" +
+        '<button class="btn btn-ghost btn-sm" data-action="copy-cert-id" data-id="' + cert.certId + '">' +
+          '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy ID' +
+        "</button>" +
+        '<a class="btn btn-ghost btn-sm" href="verify.html?id=' + encodeURIComponent(cert.certId) + '">' +
+          '<svg class="ic ic-sm"><use href="#i-check-circle"/></svg> Verify' +
+        "</a>" +
+      "</div>";
+  }
+
+  /* ==========================================================
+     CHALLENGE RENDERING
+     ========================================================== */
   function renderChallenge(challenge) {
     currentChallenge = challenge;
     const isDns = challenge.method === "dns-01";
@@ -459,31 +560,16 @@ window.LS_home = function () {
 
       if (lower.includes("no txt record found")) {
         hints = [
-          "Log in to your DNS provider (Cloudflare / FreeDNS / Namecheap / GoDaddy).",
+          "Log in to your DNS provider.",
           "Add a TXT record with the exact Name and Value shown below.",
           "DNS changes take 5–30 minutes to propagate worldwide.",
-          "Try a different DNS resolver: <code>nslookup -type=TXT " + escapeHtml(challenge.dns?.name || "") + " 1.1.1.1</code>"
+          "Try: <code>nslookup -type=TXT " + escapeHtml(challenge.dns?.name || "") + " 1.1.1.1</code>"
         ];
       } else if (lower.includes("token mismatch")) {
         hints = [
-          "The TXT record exists but the value doesn't match the expected token.",
+          "The TXT record exists but the value doesn't match.",
           "Copy the exact Value below — no extra spaces, no quotes.",
-          "If your DNS provider adds quotes, that's fine — it strips them.",
           "Verify with: <code>nslookup -type=TXT " + escapeHtml(challenge.dns?.name || "") + "</code>"
-        ];
-      } else if (lower.includes("could not fetch")) {
-        hints = [
-          "Make sure the file exists at exactly: <code>" + escapeHtml(challenge.http?.path || "") + "</code>",
-          "Your server must be publicly accessible on port 80 (HTTP).",
-          "Test the URL in a browser: <code>" + escapeHtml(challenge.http?.url || "") + "</code>",
-          "Check that no firewall is blocking incoming port 80."
-        ];
-      } else if (lower.includes("alpn")) {
-        hints = [
-          'The server must accept ALPN protocol <b>acme-tls/1</b>.',
-          "Install the provisioning cert on port 443 with that ALPN protocol.",
-          "Restart your server, then click Retry Verification.",
-          "Remove the provisioning cert after verification succeeds."
         ];
       }
 
@@ -492,9 +578,7 @@ window.LS_home = function () {
           '<div class="ae-head">' +
             '<div class="ae-icon"><svg class="ic ic-lg"><use href="#i-x-circle"/></svg></div>' +
             "<div>" +
-              "<h4>" + escapeHtml(info.title) +
-                '<span class="ae-code">' + escapeHtml(info.code) + "</span>" +
-              "</h4>" +
+              "<h4>" + escapeHtml(info.title) + '<span class="ae-code">' + escapeHtml(info.code) + "</span></h4>" +
               "<p>Verification attempt #" + attempts + " failed</p>" +
             "</div>" +
           "</div>" +
@@ -509,7 +593,7 @@ window.LS_home = function () {
         '<div class="status-banner">' +
           '<div class="sb-icon"><svg class="ic ic-sm"><use href="#i-info"/></svg></div>' +
           "<p><b>Fix the issue above</b>, then click Retry Verification. " +
-          "The challenge stays valid for the full hour — no need to start over.</p>" +
+          "The challenge stays valid for the full hour.</p>" +
         "</div>";
     }
 
@@ -519,17 +603,12 @@ window.LS_home = function () {
         '<div class="challenge-instruction" style="border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)">' +
           '<div class="label" style="color:#fcd34d">⚠ Advanced — Port 443 Required</div>' +
           '<div style="font-size:.82rem;color:#fcd34d;line-height:1.6">' +
-            "Download both files, install them on your server on port 443 with ALPN protocol <b>acme-tls/1</b>, " +
-            "restart the server, then verify. Remove the provisioning cert after verification succeeds." +
+            'Install the provisioning certificate on port 443 with ALPN <b>acme-tls/1</b>.' +
           "</div>" +
         "</div>" +
         '<div class="form-actions" style="margin-bottom:14px">' +
-          '<a class="btn btn-primary btn-sm" href="' + API.provisionCert(challenge.id) + '" download>' +
-            '<svg class="ic ic-sm"><use href="#i-download"/></svg> Download Provisioning Cert' +
-          "</a>" +
-          '<a class="btn btn-primary btn-sm" href="' + API.provisionKey(challenge.id) + '" download>' +
-            '<svg class="ic ic-sm"><use href="#i-download"/></svg> Download Provisioning Key' +
-          "</a>" +
+          '<a class="btn btn-primary btn-sm" href="' + API.provisionCert(challenge.id) + '" download>Download Provisioning Cert</a>' +
+          '<a class="btn btn-primary btn-sm" href="' + API.provisionKey(challenge.id) + '" download>Download Provisioning Key</a>' +
         "</div>";
     } else if (isDns) {
       recordRows =
@@ -544,33 +623,16 @@ window.LS_home = function () {
         '<div class="record-table">' +
           '<div class="record-row"><span class="k">File Path</span><span class="v">' + escapeHtml(challenge.http.path) + "</span></div>" +
           '<div class="record-row"><span class="k">Content</span><span class="v">' + escapeHtml(challenge.http.content) + "</span></div>" +
-        "</div>" +
-        '<div class="challenge-instruction">' +
-          '<div class="label">Accessible URL</div>' +
-          '<div class="value">' + escapeHtml(challenge.http.url) + "</div>" +
         "</div>";
     }
 
     const providerHint = isDns
-      ? 'Log into your DNS provider, add the TXT record exactly as shown, then click <b>Verify Now</b>. DNS propagation takes 5–30 minutes.'
+      ? 'Log into your DNS provider, add the TXT record exactly as shown, then click <b>Verify Now</b>.'
       : isTls
         ? 'Install the provisioning files on port 443 with ALPN <b>acme-tls/1</b>, then click <b>Verify Now</b>.'
         : 'Create the file on your web server (public on port 80), then click <b>Verify Now</b>.';
 
-    // Setup guide link specific to current method
     const setupMethod = isDns ? "dns" : isTls ? "tls" : "http";
-    const setupLinkHtml =
-      '<div style="margin-top:14px;padding:12px 14px;border-radius:12px;' +
-        'background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.22);' +
-        'display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-        '<svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-info"/></svg>' +
-        '<span style="font-size:.78rem;color:#a9b6cd;flex:1;min-width:180px">' +
-          "Need visual help? See the step-by-step guide for your provider." +
-        "</span>" +
-        '<a class="btn btn-ghost btn-sm" href="setup.html?method=' + setupMethod + '" style="width:auto">' +
-          '<svg class="ic ic-sm"><use href="#i-globe"/></svg> Open Setup Guide' +
-        "</a>" +
-      "</div>";
 
     resultBox.innerHTML =
       '<div class="challenge-panel">' +
@@ -580,43 +642,35 @@ window.LS_home = function () {
             "<h3>Domain Verification Required" +
               (attempts ? '<span class="attempt-count">' + attempts + " attempt" + (attempts > 1 ? "s" : "") + "</span>" : "") +
             "</h3>" +
-            "<p>Prove ownership of <b>" + escapeHtml(challenge.domain) + "</b> using " +
-              (isDns ? "a DNS TXT record" : isTls ? "a temporary TLS certificate" : "an HTTP well-known file") + ".</p>" +
+            "<p>Prove ownership of <b>" + escapeHtml(challenge.domain) + "</b>.</p>" +
           "</div>" +
         "</div>" +
-        errorHtml +
-        statusHtml +
-        recordRows +
+        errorHtml + statusHtml + recordRows +
         '<div class="challenge-instruction" style="margin-bottom:14px">' +
           '<div class="label">Challenge ID</div>' +
           '<div class="value">' + escapeHtml(challenge.id) + "</div>" +
         "</div>" +
-        '<div class="challenge-timer">' +
-          "<span>Challenge expires in</span> <b id=\"ch-timer\">--:--</b>" +
-        "</div>" +
+        '<div class="challenge-timer"><span>Challenge expires in</span> <b id="ch-timer">--:--</b></div>' +
         '<div class="challenge-hint">' + providerHint + "</div>" +
         '<div class="form-actions" style="margin-top:6px">' +
           '<button class="btn btn-primary" data-action="verify-challenge" data-id="' + challenge.id + '">' +
             '<svg class="ic ic-sm"><use href="#i-check-circle"/></svg> ' + (hasError ? "Retry Verification" : "Verify Now") +
           "</button>" +
           (isDns
-            ? '<button class="btn btn-ghost btn-sm" data-action="copy-dns-name">' +
-                '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Record Name' +
-              "</button>" +
-              '<button class="btn btn-ghost btn-sm" data-action="copy-dns-value">' +
-                '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Value' +
-              "</button>"
-            : "") +
-          (isTls
-            ? '<button class="btn btn-ghost btn-sm" data-action="copy-alpn-token">' +
-                '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Token' +
-              "</button>"
+            ? '<button class="btn btn-ghost btn-sm" data-action="copy-dns-name"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Name</button>' +
+              '<button class="btn btn-ghost btn-sm" data-action="copy-dns-value"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy Value</button>'
             : "") +
           '<button class="btn btn-ghost btn-sm" data-action="cancel-challenge">' +
             '<svg class="ic ic-sm"><use href="#i-x-circle"/></svg> Cancel' +
           "</button>" +
         "</div>" +
-        setupLinkHtml +
+        '<div style="margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.22);display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+          '<svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-info"/></svg>' +
+          '<span style="font-size:.78rem;color:#a9b6cd;flex:1;min-width:180px">Need visual help? See the step-by-step guide.</span>' +
+          '<a class="btn btn-ghost btn-sm" href="setup.html?method=' + setupMethod + '" style="width:auto">' +
+            '<svg class="ic ic-sm"><use href="#i-globe"/></svg> Open Guide' +
+          "</a>" +
+        "</div>" +
       "</div>";
 
     startChallengeTimer(challenge.expiresAt);
@@ -645,40 +699,6 @@ window.LS_home = function () {
     challengeTimerInterval = setInterval(update, 1000);
   }
 
-  function renderIssued(cert) {
-    clearChallengeTimer();
-    currentChallenge = null;
-
-    resultBox.innerHTML =
-      '<div class="issued-head">' +
-        '<div class="ok-ring"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
-        "<div><h3>Certificate Issued</h3><p>Signed by Let-S Secure Private CA</p></div>" +
-      "</div>" +
-      '<div class="data-list">' +
-        '<div class="data-row"><span class="k">Certificate ID</span><span class="v">' + escapeHtml(cert.certId) + "</span></div>" +
-        '<div class="data-row"><span class="k">Domain</span><span class="v">' + escapeHtml(cert.domain) + "</span></div>" +
-        '<div class="data-row"><span class="k">Project</span><span class="v">' + escapeHtml(cert.project) + "</span></div>" +
-        '<div class="data-row"><span class="k">Owner</span><span class="v">' + escapeHtml(cert.owner) + "</span></div>" +
-        '<div class="data-row"><span class="k">Serial</span><span class="v">' + escapeHtml(cert.serialNumber || "—") + "</span></div>" +
-        '<div class="data-row"><span class="k">Valid Until</span><span class="v">' + escapeHtml(fmtDate(cert.expiresAt)) + "</span></div>" +
-      "</div>" +
-      (cert.fingerprint
-        ? '<div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:8px">SHA-256 Fingerprint</div>' +
-          '<div class="mono" style="font-size:.71rem;color:#7fa8d4;word-break:break-all;line-height:1.7;margin-bottom:20px">' + escapeHtml(cert.fingerprint) + "</div>"
-        : "") +
-      '<div class="form-actions" style="margin-top:0">' +
-        '<button class="btn btn-primary btn-sm" data-action="download-cert-now" data-id="' + cert.certId + '">' +
-          '<svg class="ic ic-sm"><use href="#i-download"/></svg> Download PEM' +
-        "</button>" +
-        '<button class="btn btn-ghost btn-sm" data-action="copy-cert-id" data-id="' + cert.certId + '">' +
-          '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy ID' +
-        "</button>" +
-        '<a class="btn btn-ghost btn-sm" href="verify.html?id=' + encodeURIComponent(cert.certId) + '">' +
-          '<svg class="ic ic-sm"><use href="#i-check-circle"/></svg> Verify' +
-        "</a>" +
-      "</div>";
-  }
-
   function renderIssuingChallenge() {
     resultBox.innerHTML =
       '<div class="issuing">' +
@@ -689,6 +709,9 @@ window.LS_home = function () {
       "</div>";
   }
 
+  /* ==========================================================
+     SUBMIT
+     ========================================================== */
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -728,15 +751,16 @@ window.LS_home = function () {
           body: JSON.stringify(data),
         });
 
+        // Pre-verified domain → certificate issued immediately with private key
         if (res.status === "issued" && res.certificate) {
           cacheCertId(res.certificate.certId);
-          renderIssued(res.certificate);
-          toast("🎉 Certificate " + res.certificate.certId + " issued instantly (pre-verified).", "ok", 6000);
+          renderIssued(res.certificate, res.privateKeyPem);
+          toast("🎉 Certificate issued. Save your private key now!", "ok", 8000);
           return;
         }
 
         renderChallenge(res.challenge);
-        toast("Challenge created. Complete the verification to get your certificate.", "info", 5000);
+        toast("Challenge created. Complete the verification.", "info", 5000);
       } catch (err) {
         renderAdvancedError(resultBox, err, {
           retryAction: () => form.dispatchEvent(new Event("submit", { cancelable: true })),
@@ -766,7 +790,7 @@ window.LS_home = function () {
   }
 
   /* ==========================================================
-     CHALLENGE ACTIONS
+     ACTION HANDLERS
      ========================================================== */
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-action]");
@@ -774,6 +798,7 @@ window.LS_home = function () {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
+    /* ---- Verify challenge ---- */
     if (action === "verify-challenge") {
       btn.disabled = true;
       const original = btn.innerHTML;
@@ -783,8 +808,9 @@ window.LS_home = function () {
         const res = await apiRequest(API.verifyChallenge(id), { method: "POST" });
         const cert = res.certificate;
         cacheCertId(cert.certId);
-        renderIssued(cert);
-        toast("🎉 Domain verified. Certificate " + cert.certId + " issued.", "ok", 6000);
+        // ⚠ IMPORTANT: pass res.privateKeyPem — it appears ONLY here
+        renderIssued(cert, res.privateKeyPem);
+        toast("🎉 Certificate issued. Save your private key now!", "ok", 8000);
       } catch (err) {
         let refreshed = null;
         try {
@@ -797,31 +823,31 @@ window.LS_home = function () {
           : { ...currentChallenge, lastError: err.message };
 
         renderChallenge(merged);
-        toast("Verification failed: " + (err.message || "unknown error").split("\n")[0].slice(0, 100), "err", 7000);
+        toast("Verification failed: " + (err.message || "").split("\n")[0].slice(0, 100), "err", 7000);
       } finally {
         btn.disabled = false;
         btn.innerHTML = original;
       }
     }
 
-    if (action === "copy-dns-name" && currentChallenge) {
-      const ok = await copyText(currentChallenge.dns.name);
-      toast(ok ? "DNS record name copied." : "Copy failed.", ok ? "ok" : "err");
-    }
-    if (action === "copy-dns-value" && currentChallenge) {
-      const ok = await copyText(currentChallenge.dns.value);
-      toast(ok ? "DNS record value copied." : "Copy failed.", ok ? "ok" : "err");
-    }
-    if (action === "copy-alpn-token" && currentChallenge) {
-      const ok = await copyText(currentChallenge.token);
-      toast(ok ? "ALPN token copied." : "Copy failed.", ok ? "ok" : "err");
-    }
-    if (action === "cancel-challenge") {
-      if (!confirm("Cancel this challenge? You'll need to start over.")) return;
-      renderInitial();
-      toast("Challenge cancelled.", "info");
+    /* ---- NEW: Download private key (once) ---- */
+    if (action === "download-private-key") {
+      const el = document.getElementById("pk-content-" + id);
+      if (!el) { toast("Private key not found on page.", "err"); return; }
+      const pem = el.textContent;
+      downloadFile(id + ".key.pem", pem, "application/x-pem-file");
+      toast("Downloaded " + id + ".key.pem — save it securely!", "ok", 5000);
     }
 
+    /* ---- NEW: Copy private key ---- */
+    if (action === "copy-private-key") {
+      const el = document.getElementById("pk-content-" + id);
+      if (!el) { toast("Private key not found on page.", "err"); return; }
+      const ok = await copyText(el.textContent);
+      toast(ok ? "Private key copied. Store it securely!" : "Copy failed.", ok ? "ok" : "err", 5000);
+    }
+
+    /* ---- Download certificate ---- */
     if (action === "download-cert-now") {
       try {
         const res = await fetch(API.download(id));
@@ -833,14 +859,46 @@ window.LS_home = function () {
         renderAdvancedError(resultBox, err);
       }
     }
+
+    /* ---- NEW: Download fullchain ---- */
+    if (action === "download-fullchain-now") {
+      try {
+        const res = await fetch(API.fullchain(id));
+        if (!res.ok) throw new Error("Download failed");
+        const pem = await res.text();
+        downloadFile(id + "-fullchain.pem", pem);
+        toast("Downloaded " + id + "-fullchain.pem", "ok");
+      } catch (err) {
+        toast("Download failed: " + err.message, "err");
+      }
+    }
+
+    /* ---- Copy cert ID ---- */
     if (action === "copy-cert-id") {
       const ok = await copyText(id);
       toast(ok ? "Certificate ID copied." : "Copy failed.", ok ? "ok" : "err");
     }
+
+    /* ---- Copy DNS helpers ---- */
+    if (action === "copy-dns-name" && currentChallenge?.dns) {
+      const ok = await copyText(currentChallenge.dns.name);
+      toast(ok ? "DNS name copied." : "Copy failed.", ok ? "ok" : "err");
+    }
+    if (action === "copy-dns-value" && currentChallenge?.dns) {
+      const ok = await copyText(currentChallenge.dns.value);
+      toast(ok ? "DNS value copied." : "Copy failed.", ok ? "ok" : "err");
+    }
+
+    /* ---- Cancel challenge ---- */
+    if (action === "cancel-challenge") {
+      if (!confirm("Cancel this challenge? You'll need to start over.")) return;
+      renderInitial();
+      toast("Challenge cancelled.", "info");
+    }
   });
 
   /* ==========================================================
-     ROOT CA DOWNLOAD
+     ROOT CA
      ========================================================== */
   const downloadRootCaBtn = $("#download-root-ca-btn");
   const copyRootCaBtn = $("#copy-root-ca-btn");
@@ -869,7 +927,6 @@ window.LS_home = function () {
           retryAction: () => downloadRootCaBtn.click(),
           retryLabel: "Retry Download",
         });
-        toast("Download failed: " + err.message, "err");
       } finally {
         downloadRootCaBtn.disabled = false;
       }
@@ -879,16 +936,12 @@ window.LS_home = function () {
   if (copyRootCaBtn) {
     copyRootCaBtn.addEventListener("click", async () => {
       copyRootCaBtn.disabled = true;
-      rootCaError.innerHTML = "";
       try {
         const pem = await fetchRootCaPem();
         const ok = await copyText(pem);
-        toast(ok ? "Root CA PEM copied to clipboard." : "Copy failed.", ok ? "ok" : "err");
+        toast(ok ? "Root CA copied." : "Copy failed.", ok ? "ok" : "err");
       } catch (err) {
-        renderAdvancedError(rootCaError, err, {
-          retryAction: () => copyRootCaBtn.click(),
-          retryLabel: "Retry",
-        });
+        renderAdvancedError(rootCaError, err);
       } finally {
         copyRootCaBtn.disabled = false;
       }
