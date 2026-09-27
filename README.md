@@ -1,6 +1,6 @@
 # Let-S Secure — Frontend (Private CA Web Interface)
 
-Static, framework-free frontend for the Let-S Secure Private Certificate Authority. Built with vanilla HTML, CSS, and JavaScript — no build step, no dependencies. Hosted on GitHub Pages.
+Static, framework-free frontend for the Let-S Secure **Private Certificate Authority**. Built with vanilla HTML, CSS, and JavaScript — no build step, no dependencies. Hosted on GitHub Pages.
 
 > ⚠️ **Private CA only.** Certificates issued through this interface are valid only on systems that have installed the Let-S Secure Root CA.
 
@@ -20,7 +20,6 @@ Static, framework-free frontend for the Let-S Secure Private Certificate Authori
 - [Quick Start](#-quick-start)
 - [Configuration](#-configuration)
 - [Deployment](#-deployment)
-- [Client-Side Crypto](#-client-side-crypto)
 - [Advanced Error Handling](#-advanced-error-handling)
 - [Supported DNS Providers](#-supported-dns-providers)
 - [Troubleshooting](#-troubleshooting)
@@ -74,7 +73,7 @@ This is the **frontend** for Let-S Secure. It's a fully static site (no server-s
 - **22+ DNS providers** — visual UI mockups with highlighted fields
 - **Copy buttons** — one-click token / path copying
 - **Terminal commands** — ready-to-run snippets
-- **Troubleshooting** — 6 common issues with fixes
+- **Troubleshooting** — common issues with fixes
 
 ### Design
 - **Dark glassmorphism** theme
@@ -96,8 +95,6 @@ This is the **frontend** for Let-S Secure. It's a fully static site (no server-s
 | **`download.html`** | Download PEM / Fullchain / CRT, copy to clipboard |
 | **`admin.html`** | Admin dashboard (login, certs, Root CA, whitelist, logs) |
 | **`setup.html`** | Visual DNS setup guide for 22+ providers |
-| **`merchant/*.html`** | Merchant platform pages (optional) |
-| **`checkout/*.html`** | Hosted checkout for customer payments |
 
 ---
 
@@ -111,31 +108,12 @@ lets-secure/
 ├── status.html             Lifecycle status
 ├── download.html           Download options
 ├── admin.html              Admin panel
-├── setup.html              DNS setup guide
+├── setup.html              DNS setup guide (22+ providers)
 ├── README.md               This file
-│
-├── merchant/               Merchant platform (optional)
-│   ├── apply.html
-│   ├── dashboard.html
-│   ├── payment-links.html
-│   ├── invoices.html
-│   ├── payments.html
-│   ├── refunds.html
-│   ├── customers.html
-│   ├── api-keys.html
-│   ├── webhooks.html
-│   ├── analytics.html
-│   └── settlements.html
-│
-├── checkout/               Hosted checkout
-│   ├── index.html
-│   ├── success.html
-│   └── failed.html
 │
 └── assets/
     ├── style.css           All styles (shared across pages)
-    ├── app.js              Shared JS (config, API, errors, helpers)
-    └── qrcode.js           QR code generator (optional)
+    └── app.js              Shared JS (config, API, errors, helpers)
 ```
 
 ---
@@ -192,16 +170,32 @@ window.LS = window.LS || {};
 LS.API_BASE = "https://lets-secure-ca.onrender.com";
 
 LS.API = {
+  // Certificate request flow
   requestCert:     () => `${LS.API_BASE}/api/request-cert`,
   challenge:       (id) => `${LS.API_BASE}/api/challenge/${id}`,
   verifyChallenge: (id) => `${LS.API_BASE}/api/verify-challenge/${id}`,
+  provisionCert:   (id) => `${LS.API_BASE}/api/challenge/${id}/provision-cert`,
+  provisionKey:    (id) => `${LS.API_BASE}/api/challenge/${id}/provision-key`,
+
+  // Certificate operations
+  verifyCert:      () => `${LS.API_BASE}/api/verify-cert`,
   status:          (id) => `${LS.API_BASE}/api/status/${id}`,
   download:        (id) => `${LS.API_BASE}/api/cert/${id}`,
   fullchain:       (id) => `${LS.API_BASE}/api/cert/${id}/fullchain`,
   key:             (id) => `${LS.API_BASE}/api/cert/${id}/key`,
+  downloadJson:    (id) => `${LS.API_BASE}/api/cert/${id}/json`,
   rootCaPem:       () => `${LS.API_BASE}/api/root-ca.pem`,
+
+  // Admin
   adminLogin:      () => `${LS.API_BASE}/api/admin/login`,
-  // ... etc
+  adminCreateRoot: () => `${LS.API_BASE}/api/admin/create-root-ca`,
+  adminRootInfo:   () => `${LS.API_BASE}/api/admin/root-ca`,
+  adminListCerts:  () => `${LS.API_BASE}/api/admin/certificates`,
+  adminRevoke:     () => `${LS.API_BASE}/api/admin/revoke-cert`,
+  adminDelete:     (id) => `${LS.API_BASE}/api/admin/certificate/${id}`,
+  adminAuditLogs:  () => `${LS.API_BASE}/api/admin/audit-logs`,
+  adminVerifiedDomains: () => `${LS.API_BASE}/api/admin/verified-domains`,
+  adminVerifiedDomainDelete: (id) => `${LS.API_BASE}/api/admin/verified-domains/${id}`,
 };
 ```
 
@@ -246,9 +240,9 @@ Output directory: .
 
 ---
 
-## 🔐 Client-Side Crypto
+## 🔐 Private Key Display
 
-The frontend never sees private keys in plaintext beyond the initial display.
+The frontend never stores private keys persistently.
 
 ### Key Display Flow
 
@@ -264,7 +258,7 @@ The frontend never sees private keys in plaintext beyond the initial display.
    b. Copy to clipboard
    c. Confirm "I have saved it" checkbox
         ↓
-5. Panel disappears after leaving the page (never stored in localStorage)
+5. Panel disappears when leaving the page (never stored)
 ```
 
 **Important:** The private key is **never** written to `localStorage`, `sessionStorage`, or any cookie. It lives only in the DOM until the page is unloaded.
@@ -291,10 +285,10 @@ Every error is classified into a specific code with fix hints.
 
 | Trigger | Title | Code | Hints |
 |---|---|---|---|
-| `fetch failed` | Cannot reach CA server | `NETWORK_ERROR` | Check connection, wait 30s, open `/healthz` |
+| `fetch failed` | Cannot reach CA server | `NETWORK_ERROR` | Check connection, wait 30s |
 | HTTP 502/503/504 | Server starting up | `SERVER_503` | Wait 30-60s, retry |
 | "Root CA not initialized" | Root CA not initialized | `NO_ROOT_CA` | Go to Admin → Create Root CA |
-| "No TXT record found" | DNS TXT record not found | `DNS_NOT_FOUND` | Add TXT, wait 5-30 min, use `nslookup` |
+| "No TXT record found" | DNS TXT record not found | `DNS_NOT_FOUND` | Add TXT, wait 5-30 min |
 | "Token mismatch" | TXT record value mismatch | `DNS_MISMATCH` | Copy exact value, no quotes |
 | "Could not fetch" | Cannot reach HTTP file | `HTTP_FETCH_FAILED` | Port 80, public access |
 | "challenge expired" | Challenge expired | `CHALLENGE_EXPIRED` | Request new cert |
@@ -320,7 +314,7 @@ Each provider card shows:
 - Step-by-step numbered list
 - **Visual mockup** of the provider's UI (CSS-drawn)
 - **Highlighted target fields** with pulse animation
-- Provider-specific tips (e.g., "Cloudflare requires DNS-only mode")
+- Provider-specific tips
 - Copy buttons for tokens
 
 ---
@@ -334,8 +328,8 @@ Each provider card shows:
 | **"Cannot reach CA server"** | Backend cold-starting | Wait 30s, retry |
 | **API URL wrong** | Wrong `LS.API_BASE` | Edit `assets/app.js` |
 | **Private key panel missing** | Old version cached | Hard refresh (Ctrl+Shift+R) |
-| **Admin login 401** | Wrong credentials | Check `ADMIN_EMAIL` / `ADMIN_PASSWORD` on backend |
-| **Toast not showing** | Popup blocker | Allow notifications for site |
+| **Admin login 401** | Wrong credentials | Check `ADMIN_EMAIL` / `ADMIN_PASSWORD` |
+| **Toast not showing** | Popup blocker | Allow notifications |
 | **Icons not visible** | SVG sprite not injected | Check `LS.injectIcons()` runs |
 
 ---
