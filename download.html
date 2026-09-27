@@ -30,6 +30,7 @@
       <a class="nav-link" href="verify.html">Verify</a>
       <a class="nav-link" href="status.html">Status</a>
       <a class="nav-link active" href="download.html">Download</a>
+      <a class="nav-link" href="setup.html">Setup</a>
       <a class="nav-link" href="admin.html">Admin</a>
     </div>
   </nav>
@@ -40,7 +41,7 @@
     <div class="page-head">
       <span class="eyebrow"><svg class="ic ic-sm"><use href="#i-download"/></svg> Export</span>
       <h1>Download Certificate</h1>
-      <p>Export your signed certificate as PEM or CRT, ready for your web server.</p>
+      <p>Export your signed certificate as PEM, fullchain, or CRT — ready for your web server.</p>
     </div>
 
     <div class="glass tool-card reveal">
@@ -54,6 +55,36 @@
         </button>
       </div>
       <div id="download-result"></div>
+    </div>
+
+    <!-- Info block -->
+    <div class="glass" style="padding:24px;margin:34px auto 0;max-width:820px">
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+        <div style="width:48px;height:48px;border-radius:14px;flex:none;display:grid;place-items:center;background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.4);color:var(--accent)">
+          <svg class="ic ic-lg"><use href="#i-info"/></svg>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <h3 style="font-size:1rem;margin-bottom:8px">About the download options</h3>
+          <ul style="list-style:none;padding:0;margin:0;display:grid;gap:10px">
+            <li style="font-size:.85rem;color:var(--muted);line-height:1.6;padding-left:24px;position:relative">
+              <span style="position:absolute;left:0;color:var(--accent);font-weight:800">→</span>
+              <b style="color:#fff">Certificate (.pem)</b> — the leaf certificate only. Use for verifying or inspection.
+            </li>
+            <li style="font-size:.85rem;color:var(--muted);line-height:1.6;padding-left:24px;position:relative">
+              <span style="position:absolute;left:0;color:var(--accent);font-weight:800">→</span>
+              <b style="color:#fff">Fullchain (.pem)</b> — leaf + Root CA bundle. This is what Nginx / Apache / Caddy / Traefik expect for <code style="padding:1px 6px;border-radius:5px;background:rgba(0,0,0,.4);font-size:.72rem;color:var(--accent)">ssl_certificate</code>.
+            </li>
+            <li style="font-size:.85rem;color:var(--muted);line-height:1.6;padding-left:24px;position:relative">
+              <span style="position:absolute;left:0;color:var(--accent);font-weight:800">→</span>
+              <b style="color:#fff">Certificate (.crt)</b> — same as .pem but with .crt extension (some hosts require this).
+            </li>
+            <li style="font-size:.85rem;color:var(--muted);line-height:1.6;padding-left:24px;position:relative">
+              <span style="position:absolute;left:0;color:#fcd34d;font-weight:800">→</span>
+              <b style="color:#fff">Private key</b> — was shown <b>once</b> at issuance. If you lost it, ask your admin to retrieve it via the Admin panel.
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -73,9 +104,9 @@
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
+      <a href="setup.html">Setup Guide</a>
       <a href="index.html#request">Request Certificate</a>
       <a href="index.html#trust-root">Download Root CA</a>
-      <a href="index.html#features">Features</a>
       <a href="admin.html">Admin Panel</a>
     </div>
   </div>
@@ -90,7 +121,7 @@
 window.LS_download = function () {
   "use strict";
   const { $, escapeHtml, fmtDate, toast, apiRequest, CERT_ID_RE,
-    renderAdvancedError, downloadFile, copyText } = LS;
+    renderAdvancedError, downloadFile, copyText, fetchPem } = LS;
   const API = LS.API;
 
   const input = $("#download-input");
@@ -100,18 +131,9 @@ window.LS_download = function () {
   let loadedCert = null;
   let loadedPem = "";
 
-  async function fetchPem(id) {
-    const res = await fetch(API.download(id));
-    if (!res.ok) {
-      let msg = "Certificate not found";
-      try { const j = await res.json(); msg = j.error || msg; } catch {}
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
-    }
-    return res.text();
-  }
-
+  /* ==========================================================
+     LOAD CERTIFICATE
+     ========================================================== */
   async function load() {
     const q = (input.value || "").trim().toUpperCase();
     if (!q) {
@@ -139,51 +161,90 @@ window.LS_download = function () {
     btn.disabled = true;
     out.innerHTML = '<div class="verify-result"><div class="verify-banner warn">' +
       '<div class="vb-icon"><span class="spinner"></span></div>' +
-      "<div><h3>Loading…</h3><p>Fetching PEM bundle from CA</p></div></div></div>";
+      "<div><h3>Loading…</h3><p>Fetching certificate bundle</p></div></div></div>";
 
     try {
+      // Fetch metadata + PEM in parallel
       const [statusRes, pem] = await Promise.all([
         apiRequest(API.status(q)).catch(() => null),
-        fetchPem(q).catch(() => ""),
+        fetchPem(API.download(q)).catch(() => ""),
       ]);
-      const cert = statusRes ? statusRes.certificate : { certId: q, domain: q, project: "—", expiresAt: null };
+      const cert = statusRes
+        ? statusRes.certificate
+        : { certId: q, domain: q, project: "—", expiresAt: null };
       loadedCert = cert;
       loadedPem = pem;
       renderDownload(cert, pem);
     } catch (err) {
-      renderAdvancedError(out, err, {
-        retryAction: load,
-        retryLabel: "Retry",
-      });
+      renderAdvancedError(out, err, { retryAction: load, retryLabel: "Retry" });
     } finally {
       btn.disabled = false;
     }
   }
 
+  /* ==========================================================
+     RENDER
+     ========================================================== */
   function renderDownload(cert, pem) {
+    const isRevoked = cert.status === "revoked";
+    const isExpired = cert.expiresAt && Date.now() > new Date(cert.expiresAt).getTime();
+    const bannerClass = isRevoked ? "bad" : isExpired ? "warn" : "ok";
+    const bannerIcon = isRevoked ? "i-x-circle" : isExpired ? "i-clock" : "i-check-circle";
+
     out.innerHTML =
       '<div class="verify-result">' +
-        '<div class="verify-banner ok">' +
-          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#i-check-circle"/></svg></div>' +
+        '<div class="verify-banner ' + bannerClass + '">' +
+          '<div class="vb-icon"><svg class="ic ic-lg"><use href="#' + bannerIcon + '"/></svg></div>' +
           "<div><h3>" + escapeHtml(cert.domain || cert.certId) + "</h3>" +
           "<p>" + escapeHtml(cert.certId) + " · " + escapeHtml(cert.project || "—") +
-          (cert.expiresAt ? " · expires " + escapeHtml(fmtDate(cert.expiresAt)) : "") + "</p></div>" +
+          (cert.expiresAt ? " · expires " + escapeHtml(fmtDate(cert.expiresAt)) : "") +
+          (isRevoked ? " · <b>REVOKED</b>" : isExpired ? " · <b>EXPIRED</b>" : "") +
+          "</p></div>" +
         "</div>" +
+
+        (isRevoked
+          ? '<div class="status-banner" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.35)">' +
+              '<div class="sb-icon" style="background:rgba(239,68,68,.2);color:#fca5a5"><svg class="ic ic-sm"><use href="#i-x-circle"/></svg></div>' +
+              "<p><b>This certificate has been revoked</b> and must not be trusted. " +
+              "Do not deploy it on production servers.</p>" +
+            "</div>"
+          : "") +
+
         (pem
           ? '<div class="pem-box">' +
-              '<div class="pem-head"><span>certificate.pem</span><span>PEM · Base64</span></div>' +
+              '<div class="pem-head"><span>' + escapeHtml(cert.certId) + '.pem</span><span>PEM · Base64</span></div>' +
               '<div class="pem-body">' + escapeHtml(pem) + "</div>" +
             "</div>"
           : '<div class="status-banner"><div class="sb-icon"><svg class="ic ic-sm"><use href="#i-info"/></svg></div>' +
-            "<p>The PEM bundle was not available. Click Download again to retry.</p></div>") +
+            "<p>PEM bundle was not available. Click Download again to retry.</p></div>") +
+
         '<div class="form-actions" style="margin-top:22px">' +
-          '<button class="btn btn-primary btn-sm" data-dl="pem"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .pem</button>' +
-          '<button class="btn btn-ghost btn-sm" data-dl="crt"><svg class="ic ic-sm"><use href="#i-download"/></svg> Download .crt</button>' +
-          '<button class="btn btn-ghost btn-sm" data-dl="copy"><svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy PEM</button>' +
+          '<button class="btn btn-primary btn-sm" data-dl="pem">' +
+            '<svg class="ic ic-sm"><use href="#i-download"/></svg> Certificate (.pem)' +
+          "</button>" +
+          '<button class="btn btn-ghost btn-sm" data-dl="fullchain">' +
+            '<svg class="ic ic-sm"><use href="#i-download"/></svg> Fullchain (.pem)' +
+          "</button>" +
+          '<button class="btn btn-ghost btn-sm" data-dl="crt">' +
+            '<svg class="ic ic-sm"><use href="#i-download"/></svg> Certificate (.crt)' +
+          "</button>" +
+          '<button class="btn btn-ghost btn-sm" data-dl="copy">' +
+            '<svg class="ic ic-sm"><use href="#i-copy"/></svg> Copy PEM' +
+          "</button>" +
+        "</div>" +
+
+        '<div class="status-banner" style="margin-top:16px;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.35)">' +
+          '<div class="sb-icon" style="background:rgba(245,158,11,.2);color:#fcd34d"><svg class="ic ic-sm"><use href="#i-key"/></svg></div>' +
+          "<p><b>Need the private key?</b> " +
+          "It was shown only once at issuance. " +
+          "If you lost it, contact the CA administrator — they can retrieve it from the Admin panel.</p>" +
         "</div>" +
       "</div>";
   }
 
+  /* ==========================================================
+     DOWNLOAD ACTIONS
+     ========================================================== */
   btn.addEventListener("click", load);
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); load(); }
@@ -193,27 +254,63 @@ window.LS_download = function () {
     const b = e.target.closest("[data-dl]");
     if (!b || !loadedCert) return;
     const kind = b.dataset.dl;
+    const certId = loadedCert.certId;
 
-    if (!loadedPem) {
-      try { loadedPem = await fetchPem(loadedCert.certId); }
-      catch (err) {
-        renderAdvancedError(out, err, { retryAction: load, retryLabel: "Retry Load" });
-        return;
+    /* ---- Download leaf certificate ---- */
+    if (kind === "pem") {
+      b.disabled = true;
+      try {
+        const pem = loadedPem || (await fetchPem(API.download(certId)));
+        downloadFile(certId + ".pem", pem);
+        toast("Downloaded " + certId + ".pem", "ok");
+      } catch (err) {
+        toast("Download failed: " + err.message, "err");
+      } finally {
+        b.disabled = false;
       }
     }
 
-    if (kind === "pem") {
-      downloadFile(loadedCert.certId + ".pem", loadedPem);
-      toast("Downloaded " + loadedCert.certId + ".pem", "ok");
-    } else if (kind === "crt") {
-      downloadFile(loadedCert.certId + ".crt", loadedPem, "application/x-x509-ca-cert");
-      toast("Downloaded " + loadedCert.certId + ".crt", "ok");
-    } else if (kind === "copy") {
-      const ok = await copyText(loadedPem);
+    /* ---- Download fullchain ---- */
+    if (kind === "fullchain") {
+      b.disabled = true;
+      try {
+        const pem = await fetchPem(API.fullchain(certId));
+        downloadFile(certId + "-fullchain.pem", pem);
+        toast("Downloaded " + certId + "-fullchain.pem", "ok");
+      } catch (err) {
+        renderAdvancedError(out, err, { retryAction: load, retryLabel: "Retry Load" });
+        toast("Download failed: " + err.message, "err");
+      } finally {
+        b.disabled = false;
+      }
+    }
+
+    /* ---- Download .crt (same content, different extension) ---- */
+    if (kind === "crt") {
+      b.disabled = true;
+      try {
+        const pem = loadedPem || (await fetchPem(API.download(certId)));
+        downloadFile(certId + ".crt", pem, "application/x-x509-ca-cert");
+        toast("Downloaded " + certId + ".crt", "ok");
+      } catch (err) {
+        toast("Download failed: " + err.message, "err");
+      } finally {
+        b.disabled = false;
+      }
+    }
+
+    /* ---- Copy PEM to clipboard ---- */
+    if (kind === "copy") {
+      const pem = loadedPem || (await fetchPem(API.download(certId)).catch(() => ""));
+      if (!pem) { toast("Nothing to copy.", "err"); return; }
+      const ok = await copyText(pem);
       toast(ok ? "PEM copied to clipboard." : "Copy failed.", ok ? "ok" : "err");
     }
   });
 
+  /* ==========================================================
+     PREFILL FROM URL
+     ========================================================== */
   const params = new URLSearchParams(location.search);
   if (params.get("id")) {
     input.value = params.get("id").toUpperCase();
