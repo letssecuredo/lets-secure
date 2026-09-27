@@ -7,15 +7,23 @@ window.LS = window.LS || {};
 LS.API_BASE = "https://lets-secure-ca.onrender.com";
 
 LS.API = {
+  // Certificate request flow
   requestCert:  () => `${LS.API_BASE}/api/request-cert`,
   challenge:    (id) => `${LS.API_BASE}/api/challenge/${encodeURIComponent(id)}`,
   verifyChallenge: (id) => `${LS.API_BASE}/api/verify-challenge/${encodeURIComponent(id)}`,
   provisionCert:(id) => `${LS.API_BASE}/api/challenge/${encodeURIComponent(id)}/provision-cert`,
   provisionKey: (id) => `${LS.API_BASE}/api/challenge/${encodeURIComponent(id)}/provision-key`,
+
+  // Certificate operations
   verifyCert:   () => `${LS.API_BASE}/api/verify-cert`,
   status:       (id) => `${LS.API_BASE}/api/status/${encodeURIComponent(id)}`,
   download:     (id) => `${LS.API_BASE}/api/cert/${encodeURIComponent(id)}`,
+  fullchain:    (id) => `${LS.API_BASE}/api/cert/${encodeURIComponent(id)}/fullchain`,
+  key:          (id) => `${LS.API_BASE}/api/cert/${encodeURIComponent(id)}/key`,
+  downloadJson: (id) => `${LS.API_BASE}/api/cert/${encodeURIComponent(id)}/json`,
   rootCaPem:    () => `${LS.API_BASE}/api/root-ca.pem`,
+
+  // Admin
   adminLogin:   () => `${LS.API_BASE}/api/admin/login`,
   adminCreateRoot: () => `${LS.API_BASE}/api/admin/create-root-ca`,
   adminRootInfo:   () => `${LS.API_BASE}/api/admin/root-ca`,
@@ -316,6 +324,32 @@ LS.classifyError = function (err) {
     };
   }
 
+  if (msg.includes("private key not available") || msg.includes("key not available")) {
+    return {
+      title: "Private key not available",
+      code: "NO_PRIVATE_KEY",
+      hints: [
+        "This certificate was issued before encryption-at-rest was enabled.",
+        "The key was discarded at issuance and cannot be recovered.",
+        "Request a new certificate to get a fresh private key."
+      ],
+      retryable: false,
+    };
+  }
+
+  if (msg.includes("could not be decrypted")) {
+    return {
+      title: "Private key decryption failed",
+      code: "KEY_DECRYPT_FAILED",
+      hints: [
+        "The MASTER_ENCRYPTION_KEY may have changed since issuance.",
+        "Contact the CA administrator.",
+        "Do NOT delete the certificate — it may be recoverable with the original key."
+      ],
+      retryable: false,
+    };
+  }
+
   if (msg.includes("signature verification failed")) {
     return {
       title: "Signature verification failed",
@@ -430,7 +464,10 @@ LS.renderAdvancedError = function (container, err, opts = {}) {
         "<ul>" + hintsHtml + "</ul>" +
       "</div>" +
       '<div class="ae-actions">' +
-        (info.retryable ? '<button class="btn btn-primary btn-sm" id="ls-retry-btn"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> ' + LS.escapeHtml(retryLabel) + "</button>" : "") +
+        (info.retryable
+          ? '<button class="btn btn-primary btn-sm" id="ls-retry-btn"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> ' +
+            LS.escapeHtml(retryLabel) + "</button>"
+          : "") +
         '<button class="btn btn-ghost btn-sm" data-ls-action="dismiss-error"><svg class="ic ic-sm"><use href="#i-x-circle"/></svg> Dismiss</button>' +
       "</div>" +
     "</div>";
@@ -452,7 +489,7 @@ LS.renderAdvancedError = function (container, err, opts = {}) {
 };
 
 /* ============================================================
-   API CLIENT (with retries for transient errors)
+   API CLIENT
    ============================================================ */
 LS.getToken = () => localStorage.getItem("ls_admin_token") || "";
 LS.getAdminEmail = () => localStorage.getItem("ls_admin_email") || "";
@@ -519,6 +556,44 @@ LS.apiAuth = function (url, options = {}) {
   });
 };
 
+/**
+ * Fetch a PEM file (text response) with optional Authorization header.
+ * Throws a structured error on failure.
+ */
+LS.fetchPem = async function (url, { auth = false, timeoutMs = 30000 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const headers = {};
+    if (auth) headers.Authorization = "Bearer " + LS.getToken();
+
+    const res = await fetch(url, { headers, signal: controller.signal });
+
+    if (!res.ok) {
+      let msg = "Download failed";
+      try {
+        const j = await res.json();
+        msg = j.error || msg;
+      } catch {}
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+
+    return await res.text();
+  } catch (err) {
+    if (err.name === "AbortError") {
+      const e = new Error("Request timed out");
+      e.status = 504;
+      throw e;
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 /* ============================================================
    COPY / DOWNLOAD HELPERS
    ============================================================ */
@@ -579,7 +654,8 @@ LS.cacheCertId = function (id) {
 /* ============================================================
    FORM VALIDATION
    ============================================================ */
-LS.DOMAIN_RE = /^(?!-)(?:[a-zA-Z0-9\u00a1-\uffff](?:[a-zA-Z0-9\u00a1-\uffff-]{0,61}[a-zA-Z0-9\u00a1-\uffff])?\.)+[a-zA-Z\u00a1-\uffff]{2,}$/;
+LS.DOMAIN_RE =
+  /^(?:\*\.)?(?!-)(?:[a-zA-Z0-9\u00a1-\uffff](?:[a-zA-Z0-9\u00a1-\uffff-]{0,61}[a-zA-Z0-9\u00a1-\uffff])?\.)+[a-zA-Z\u00a1-\uffff]{2,}$/;
 LS.EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 LS.CERT_ID_RE = /^LS-[A-Fa-f0-9]{8}$/;
 LS.CHALLENGE_ID_RE = /^CH-[A-Fa-f0-9]{12}$/;
