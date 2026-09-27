@@ -30,6 +30,7 @@
       <a class="nav-link" href="verify.html">Verify</a>
       <a class="nav-link" href="status.html">Status</a>
       <a class="nav-link" href="download.html">Download</a>
+      <a class="nav-link" href="setup.html">Setup</a>
       <a class="nav-link active" href="admin.html">Admin</a>
     </div>
   </nav>
@@ -43,7 +44,6 @@
       <p>Manage your private CA — Root CA, certificates, pre-verified domains, audit logs.</p>
     </div>
 
-    <!-- Login -->
     <div class="glass admin-card reveal" id="admin-login-card">
       <h3>Admin Login</h3>
       <p class="sub">Sign in with your administrator credentials.</p>
@@ -67,7 +67,6 @@
       <div id="admin-login-error"></div>
     </div>
 
-    <!-- Dashboard -->
     <div id="admin-dashboard" style="display:none">
       <div class="glass tool-card reveal" style="max-width:100%;margin-top:0">
         <div class="admin-header">
@@ -90,7 +89,6 @@
           <div class="admin-tab" data-tab="logs">Audit Logs</div>
         </div>
 
-        <!-- TAB: Certificates -->
         <div class="admin-panel active" data-panel="certs">
           <div class="form-actions" style="margin-top:0;margin-bottom:20px">
             <button class="btn btn-ghost btn-sm" id="reload-certs-btn">
@@ -101,7 +99,6 @@
           <div class="cert-list" id="admin-cert-list"></div>
         </div>
 
-        <!-- TAB: Verified Domains -->
         <div class="admin-panel" data-panel="domains">
           <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">
             Certificates for these patterns skip the challenge. Wildcards allowed: <code>*.example.com</code> or <code>*</code> for all.
@@ -119,7 +116,6 @@
           <div class="cert-list" id="verified-domains-list"></div>
         </div>
 
-        <!-- TAB: Root CA -->
         <div class="admin-panel" data-panel="rootca">
           <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">
             The Root CA can only be created once. It is the trust anchor for every certificate.
@@ -139,7 +135,6 @@
           <div id="admin-rootca-info"></div>
         </div>
 
-        <!-- TAB: Audit Logs -->
         <div class="admin-panel" data-panel="logs">
           <div class="form-actions" style="margin-top:0;margin-bottom:20px">
             <button class="btn btn-ghost btn-sm" id="reload-logs-btn">
@@ -169,9 +164,9 @@
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
+      <a href="setup.html">Setup Guide</a>
       <a href="index.html#request">Request Certificate</a>
       <a href="index.html#trust-root">Download Root CA</a>
-      <a href="index.html#features">Features</a>
       <a href="admin.html">Admin Panel</a>
     </div>
   </div>
@@ -187,7 +182,7 @@ window.LS_admin = function () {
   "use strict";
   const { $, $$, escapeHtml, fmtDate, toast, apiAuth, apiRequest,
     getToken, setAuth, clearAuth, getAdminEmail,
-    renderAdvancedError, classifyError } = LS;
+    renderAdvancedError, classifyError, downloadFile, fetchPem } = LS;
   const API = LS.API;
 
   /* ==========================================================
@@ -297,6 +292,12 @@ window.LS_admin = function () {
           statusBadge(c) +
           '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
             '<a class="btn btn-ghost btn-sm" href="status.html?id=' + encodeURIComponent(c.certId) + '">Status</a>' +
+            '<button class="btn btn-ghost btn-sm" data-action="download-key" data-id="' + c.certId + '">' +
+              '<svg class="ic ic-sm"><use href="#i-key"/></svg> Key' +
+            "</button>" +
+            '<button class="btn btn-ghost btn-sm" data-action="download-fullchain" data-id="' + c.certId + '">' +
+              '<svg class="ic ic-sm"><use href="#i-download"/></svg> Chain' +
+            "</button>" +
             (c.status !== "revoked"
               ? '<button class="btn btn-danger btn-sm" data-action="revoke" data-id="' + c.certId + '">Revoke</button>'
               : "") +
@@ -318,6 +319,51 @@ window.LS_admin = function () {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
+    /* ---- Download private key (ADMIN only) ---- */
+    if (action === "download-key") {
+      const confirmed = confirm(
+        "Download the private key for " + id + "?\n\n" +
+        "⚠️ This is a SENSITIVE operation.\n" +
+        "The key will be decrypted and streamed to your browser.\n" +
+        "This action will be recorded in the audit log.\n\n" +
+        "Continue?"
+      );
+      if (!confirmed) return;
+
+      btn.disabled = true;
+      const original = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Loading…';
+      try {
+        const pem = await fetchPem(API.key(id), { auth: true });
+        downloadFile(id + ".key.pem", pem, "application/x-pem-file");
+        toast("Downloaded " + id + ".key.pem", "ok", 5000);
+      } catch (err) {
+        renderAdvancedError(certErr, err, {
+          retryAction: () => btn.click(),
+          retryLabel: "Retry",
+        });
+        toast("Key download failed: " + err.message, "err");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    }
+
+    /* ---- Download fullchain ---- */
+    if (action === "download-fullchain") {
+      btn.disabled = true;
+      try {
+        const pem = await fetchPem(API.fullchain(id));
+        downloadFile(id + "-fullchain.pem", pem);
+        toast("Downloaded " + id + "-fullchain.pem", "ok");
+      } catch (err) {
+        toast("Download failed: " + err.message, "err");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    /* ---- Revoke ---- */
     if (action === "revoke") {
       if (!confirm("Revoke certificate " + id + "? This cannot be undone.")) return;
       btn.disabled = true;
@@ -334,8 +380,9 @@ window.LS_admin = function () {
       }
     }
 
+    /* ---- Delete ---- */
     if (action === "delete") {
-      if (!confirm("Delete certificate " + id + " permanently?")) return;
+      if (!confirm("Delete certificate " + id + " permanently?\n\nThe encrypted private key will also be deleted.")) return;
       btn.disabled = true;
       try {
         await apiAuth(API.adminDelete(id), { method: "DELETE" });
@@ -469,7 +516,7 @@ window.LS_admin = function () {
       '<div class="vb-icon"><span class="spinner"></span></div>' +
       "<div><h3>Generating Root CA…</h3><p>RSA-4096 keypair. This takes 3–15 seconds. Do not refresh.</p></div></div>";
     try {
-      const res = await apiAuth(API.adminCreateRoot(), { method: "POST", timeoutMs: 60000 });
+      await apiAuth(API.adminCreateRoot(), { method: "POST", timeoutMs: 60000 });
       toast("Root CA created successfully.", "ok");
       loadRootInfo();
     } catch (err) {
